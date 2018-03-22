@@ -3,6 +3,7 @@
 
 # Java specific files and folders
 bin
+out
 target
 doc
 *.jar
@@ -10,6 +11,8 @@ doc
 # Editor specific files and folders
 *~
 .project
+.idea
+*.iml
 
 # Project speicific files and folders
 *.mapfg
