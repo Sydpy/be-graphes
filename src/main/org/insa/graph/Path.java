@@ -28,6 +28,10 @@ public class Path {
      */
     public static Path createFastestPathFromNodes(Graph graph, List<Node> nodes)
             throws IllegalArgumentException {
+
+        if (nodes.size() == 1)
+            return new Path(graph, nodes.get(0));
+
         List<Arc> arcs = new ArrayList<Arc>();
 
         for (int i = 0; i < nodes.size() - 1; i++) {
@@ -36,7 +40,7 @@ public class Path {
             Node nextNode = nodes.get(i + 1);
 
             double minTravelTime = Double.MAX_VALUE;
-            Arc fasteArc = null;
+            Arc fastestArc = null;
 
             for (Arc a : currentNode) {
                 if (a.getDestination() != nextNode) continue;
@@ -44,13 +48,13 @@ public class Path {
                 double travelTime = a.getMinimumTravelTime();
                 if (travelTime < minTravelTime) {
                     minTravelTime = travelTime;
-                    fasteArc = a;
+                    fastestArc = a;
                 }
             }
 
-            if (fasteArc == null) throw new IllegalArgumentException();
+            if (fastestArc == null) throw new IllegalArgumentException();
 
-            arcs.add(fasteArc);
+            arcs.add(fastestArc);
         }
 
         return new Path(graph, arcs);
