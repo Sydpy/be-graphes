@@ -225,13 +225,13 @@ public class Path {
      * 
      */
     public double getTravelTime(double speed) {
-        double time = 0;
+        double travelTime = 0;
     	
         for(Arc a : arcs) {
-        	time += a.getTravelTime(speed);
+        	travelTime += a.getTravelTime(speed);
         }
         
-        return time;
+        return travelTime;
     }
 
     /**
@@ -240,11 +240,15 @@ public class Path {
      * 
      * @return Minimum travel time to travel this path (in seconds).
      * 
-     * @deprecated Need to be implemented.
      */
     public double getMinimumTravelTime() {
-        // TODO:
-        return 0;
+        double minimumTravelTime = 0;
+    	
+        for(Arc a : arcs) {
+        	minimumTravelTime += a.getMinimumTravelTime();
+        }
+        
+        return minimumTravelTime;
     }
 
 }
