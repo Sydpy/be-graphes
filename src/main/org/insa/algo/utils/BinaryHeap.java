@@ -9,6 +9,7 @@
 
 package org.insa.algo.utils;
 
+import javax.xml.bind.SchemaOutputResolver;
 import java.util.ArrayList;
 
 /**
@@ -144,7 +145,16 @@ public class BinaryHeap<E extends Comparable<E>> implements PriorityQueue<E> {
 
     @Override
     public void remove(E x) throws ElementNotFoundException {
-        // TODO:
+
+        int index = this.array.indexOf(x);
+
+        if (index == -1 || index >= this.currentSize)
+            throw new ElementNotFoundException(x);
+
+        E exchangeItem = this.array.get(--this.currentSize);
+        arraySet(index,  exchangeItem);
+        percolateUp(index);
+        percolateDown(index);
     }
 
     @Override
