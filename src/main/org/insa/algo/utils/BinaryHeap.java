@@ -126,6 +126,29 @@ public class BinaryHeap<E extends Comparable<E>> implements PriorityQueue<E> {
         }
     }
 
+    private int indexOf(E x) {
+        if (this.currentSize <= 0) return -1;
+
+        return indexOfRec(0, x);
+    }
+    private int indexOfRec(int idx, E x) {
+       if (this.array.get(idx).equals(x)) return idx;
+
+       int leftChild = index_left(idx);
+       if (leftChild >= this.currentSize)
+           return -1;
+
+       int newIdx = indexOfRec(leftChild, x);
+       if (newIdx != -1)
+           return newIdx;
+
+       int rightChild = leftChild + 1;
+       if (rightChild >= this.currentSize)
+           return -1;
+
+       return indexOfRec(rightChild, x);
+    }
+
     @Override
     public boolean isEmpty() {
         return this.currentSize == 0;
@@ -146,12 +169,8 @@ public class BinaryHeap<E extends Comparable<E>> implements PriorityQueue<E> {
     @Override
     public void remove(E x) throws ElementNotFoundException {
 
-        int index = -1;
-
-        for (int i = 0; i < currentSize; i++) {
-            if (this.array.get(i).equals(x))
-                index = i;
-        }
+        int index = this.indexOf(x);
+        System.out.println(index);
 
         if (index == -1)
             throw new ElementNotFoundException(x);
