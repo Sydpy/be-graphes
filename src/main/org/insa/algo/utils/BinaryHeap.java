@@ -170,7 +170,6 @@ public class BinaryHeap<E extends Comparable<E>> implements PriorityQueue<E> {
     public void remove(E x) throws ElementNotFoundException {
 
         int index = this.indexOf(x);
-        System.out.println(index);
 
         if (index == -1)
             throw new ElementNotFoundException(x);
