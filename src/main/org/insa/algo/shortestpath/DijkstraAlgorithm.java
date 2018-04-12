@@ -59,6 +59,8 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 			//For each arc from the min
 			for (Arc a : minNode) {
 
+				if (!data.isAllowed(a)) continue;
+
 				Node dest = a.getDestination();
 
 				//Compute new distance from origin via minNode
