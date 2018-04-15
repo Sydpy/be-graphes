@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.insa.algo.ArcInspector;
 import org.insa.algo.AbstractInputData.Mode;
+import org.insa.algo.ArcInspectorFactory;
 import org.insa.graph.*;
 import org.insa.graph.RoadInformation.RoadType;
 import org.insa.graph.io.BinaryGraphReader;
@@ -24,17 +25,6 @@ import java.util.*;
 @RunWith(Parameterized.class)
 public class DijkstraAlgorithmTest {
 
-    public static class AllowAllInspector implements ArcInspector {
-        @Override
-        public boolean isAllowed(Arc arc) { return true; }
-        @Override
-        public double getCost(Arc arc) { return arc.getLength(); }
-        @Override
-        public int getMaximumSpeed() { return GraphStatistics.NO_MAXIMUM_SPEED; }
-        @Override
-        public Mode getMode() { return Mode.LENGTH; }
-    }
-
     @Parameters
     public static Collection<Object> data() throws IOException {
         Collection<Object> data = new ArrayList<>();
@@ -45,60 +35,65 @@ public class DijkstraAlgorithmTest {
             nodes[i] = new Node(i, null);
         }
 
+        RoadType rt = RoadType.UNCLASSIFIED;
+        AccessRestrictions ar = new AccessRestrictions();
+
         Node.linkNodes(
                 nodes[0], nodes[1], 7,
-                new RoadInformation(RoadType.UNCLASSIFIED, null, true, 1, null),
+                new RoadInformation(rt, ar, true, 1, null),
                 new ArrayList<>());
         Node.linkNodes(
                 nodes[0], nodes[2], 8,
-                new RoadInformation(RoadType.UNCLASSIFIED, null, true, 1, null),
+                new RoadInformation(rt, ar, true, 1, null),
                 new ArrayList<>());
         Node.linkNodes(
                 nodes[2], nodes[0], 7,
-                new RoadInformation(RoadType.UNCLASSIFIED, null, true, 1, null),
+                new RoadInformation(rt, ar, true, 1, null),
                 new ArrayList<>());
         Node.linkNodes(
                 nodes[1], nodes[3], 4,
-                new RoadInformation(RoadType.UNCLASSIFIED, null, true, 1, null),
+                new RoadInformation(rt, ar, true, 1, null),
                 new ArrayList<>());
         Node.linkNodes(
                 nodes[1], nodes[4], 1,
-                new RoadInformation(RoadType.UNCLASSIFIED, null, true, 1, null),
+                new RoadInformation(rt, ar, true, 1, null),
                 new ArrayList<>());
         Node.linkNodes(
                 nodes[4], nodes[3], 2,
-                new RoadInformation(RoadType.UNCLASSIFIED, null, true, 1, null),
+                new RoadInformation(rt, ar, true, 1, null),
                 new ArrayList<>());
         Node.linkNodes(
                 nodes[2], nodes[1], 2,
-                new RoadInformation(RoadType.UNCLASSIFIED, null, true, 1, null),
+                new RoadInformation(rt, ar, true, 1, null),
                 new ArrayList<>());
         Node.linkNodes(
                 nodes[1], nodes[5], 5,
-                new RoadInformation(RoadType.UNCLASSIFIED, null, true, 1, null),
+                new RoadInformation(rt, ar, true, 1, null),
                 new ArrayList<>());
         Node.linkNodes(
                 nodes[4], nodes[2], 2,
-                new RoadInformation(RoadType.UNCLASSIFIED, null, true, 1, null),
+                new RoadInformation(rt, ar, true, 1, null),
                 new ArrayList<>());
         Node.linkNodes(
                 nodes[4], nodes[5], 3,
-                new RoadInformation(RoadType.UNCLASSIFIED, null, false, 1, null),
+                new RoadInformation(rt, ar, true, 1, null),
                 new ArrayList<>());
         Node.linkNodes(
                 nodes[2], nodes[5], 2,
-                new RoadInformation(RoadType.UNCLASSIFIED, null, false, 1, null),
+                new RoadInformation(rt, ar, true, 1, null),
                 new ArrayList<>());
 
         Graph graph1 = new Graph("ID", "", Arrays.asList(nodes), null);
 
-        for (int i = 0; i < 6; i++) {
-            for (int j = 0; j < 6; j++) {
-                data.add(new ShortestPathData( graph1, nodes[i], nodes[j], new AllowAllInspector()));
+        for (ArcInspector inspector : ArcInspectorFactory.getAllFilters()) {
+            for (int i = 0; i < 6; i++) {
+                for (int j = 0; j < 6; j++) {
+                    data.add(new ShortestPathData(graph1, nodes[i], nodes[j], inspector));
+                }
             }
         }
 
-        //Construction de 50 ShortestPathData relatifs à une map
+        //Construction de ShortestPathData relatifs à une map
         GraphReader reader = new BinaryGraphReader(
                 new DataInputStream(new BufferedInputStream(new FileInputStream("res/Maps/bordeaux.mapgr"))));
 
@@ -106,10 +101,12 @@ public class DijkstraAlgorithmTest {
         int graph2Size = graph2.size();
 
         Random rand = new Random();
-        for (int i = 0; i < 50; i++) {
-            Node origin = graph2.get(rand.nextInt(graph2Size));
-            Node dest = graph2.get(rand.nextInt(graph2Size));
-            data.add(new ShortestPathData( graph2, origin, dest, new AllowAllInspector()));
+        for (ArcInspector inspector : ArcInspectorFactory.getAllFilters()) {
+            for (int i = 0; i < 10; i++) {
+                Node origin = graph2.get(rand.nextInt(graph2Size));
+                Node dest = graph2.get(rand.nextInt(graph2Size));
+                data.add(new ShortestPathData(graph2, origin, dest, inspector));
+            }
         }
 
         return data;
@@ -123,7 +120,7 @@ public class DijkstraAlgorithmTest {
     }
 
     @Test
-    public void testRun() {
+    public void testRunWithOracle() {
 
         ShortestPathAlgorithm oracle = new BellmanFordAlgorithm(data);
         ShortestPathSolution oracleSoluce = oracle.run();
@@ -145,6 +142,11 @@ public class DijkstraAlgorithmTest {
                 assertEquals(oraclePath.getArcs().get(k), algoritmPath.getArcs().get(k));
             }
         }
+    }
+
+    @Test
+    public void testRunWithoutOracle() {
+        //TODO
     }
 
     @After
