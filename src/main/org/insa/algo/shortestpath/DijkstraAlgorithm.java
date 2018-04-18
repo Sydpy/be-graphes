@@ -18,7 +18,11 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 	public DijkstraAlgorithm(ShortestPathData data) {
 		super(data);
 	}
-
+	
+	protected double computeCost(double minCost, Arc a) {
+		return minCost+ data.getCost(a);
+	}
+	
 	@Override
 	protected ShortestPathSolution doRun() {
 
@@ -65,7 +69,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 
 				//Compute new distance from origin via minNode
 				double oldDist = distances[dest.getId()];
-				double newDist = minDist + data.getCost(a);
+				double newDist = computeCost(minDist, a);
 
 				if (newDist < oldDist) {
 
