@@ -15,11 +15,13 @@ import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
@@ -88,12 +90,13 @@ public abstract class ShortestPathAlgorithmTest {
         for (ArcInspector inspector : ArcInspectorFactory.getAllFilters()) {
             for (int i = 0; i < 6; i++) {
                 for (int j = 0; j < 6; j++) {
-                    data.add(new ShortestPathData(graph1, nodes[i], nodes[j], inspector));
+                    if (i != j)
+                        data.add(new ShortestPathData(graph1, nodes[i], nodes[j], inspector));
                 }
             }
         }
 
-        //Construction de ShortestPathData relatifs à une map
+        //Build random ShortestPathData from a map
         GraphReader reader = new BinaryGraphReader(
                 new DataInputStream(new BufferedInputStream(new FileInputStream("res/Maps/bordeaux.mapgr"))));
 
@@ -102,9 +105,14 @@ public abstract class ShortestPathAlgorithmTest {
 
         Random rand = new Random();
         for (ArcInspector inspector : ArcInspectorFactory.getAllFilters()) {
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 20; i++) {
+
+                //Get two random nodes that must be different
                 Node origin = graph2.get(rand.nextInt(graph2Size));
                 Node dest = graph2.get(rand.nextInt(graph2Size));
+                while (dest.equals(origin))
+                    dest = graph2.get(rand.nextInt(graph2Size));
+
                 data.add(new ShortestPathData(graph2, origin, dest, inspector));
             }
         }
@@ -124,31 +132,93 @@ public abstract class ShortestPathAlgorithmTest {
     @Test
     public void testRunWithOracle() {
 
+        //Get oracle solution
         ShortestPathAlgorithm oracle = new BellmanFordAlgorithm(data);
         ShortestPathSolution oracleSoluce = oracle.run();
 
+        //Get algorithm solution
         ShortestPathAlgorithm algorithm = createAlgorithm(data);
         ShortestPathSolution algorithmSoluce = algorithm.run();
 
-        assertEquals(oracleSoluce.getStatus(), algorithmSoluce.getStatus());
+        //If oracle is feasible, algo must be feasible
+        //If oracle is not feasible, algo must be not feasible
+        assertEquals(oracleSoluce.isFeasible(), algorithmSoluce.isFeasible());
 
         if (oracleSoluce.isFeasible() && algorithmSoluce.isFeasible()) {
 
             Path oraclePath = oracleSoluce.getPath();
             Path algoritmPath = algorithmSoluce.getPath();
 
-            assertEquals(oraclePath.getArcs().size(), algoritmPath.getArcs().size());
-            int pathSize = oraclePath.getArcs().size();
-
-            for (int k = 0; k < pathSize; k++) {
-                assertEquals(oraclePath.getArcs().get(k), algoritmPath.getArcs().get(k));
-            }
+            //Their path should be the same
+            assertArrayEquals(oraclePath.getArcs().toArray(), algoritmPath.getArcs().toArray());
         }
     }
 
     @Test
     public void testRunWithoutOracle() {
-        //TODO
+        //Get algo solution
+        ShortestPathAlgorithm algorithm = createAlgorithm(data);
+        ShortestPathSolution algorithmSoluce = algorithm.run();
+
+        //Test : cost(a->c) <= cost(a->b) + cost(b->c) for every b
+
+        //Get data parameters
+        Node origin = data.getOrigin();
+        Node destination = data.getDestination();
+        ArcInspector inspector = data.getArcInspector();
+
+        Graph graph = data.getGraph();
+        int graphSize = graph.size();
+
+        Random rand = new Random();
+        for (int i = 0; i < 10; i++) {
+
+            //Get a random third node different from origin and destination
+            Node thirdNode = data.getGraph().get(rand.nextInt(graphSize));
+            while (thirdNode.equals(origin) || thirdNode.equals(destination))
+                thirdNode = data.getGraph().get(rand.nextInt(graphSize));
+
+            //Get solution for path from origin to thirdNode
+            ShortestPathData firstPathData = new ShortestPathData(graph, origin, thirdNode, inspector);
+            ShortestPathAlgorithm firstPathAlgo = createAlgorithm(firstPathData);
+            ShortestPathSolution firstPathSoluce = firstPathAlgo.run();
+
+            //Get solution for path from thirdNode to destination
+            ShortestPathData secondPathData = new ShortestPathData(graph, thirdNode, destination, inspector);
+            ShortestPathAlgorithm secondPathAlgo = createAlgorithm(secondPathData);
+            ShortestPathSolution secondPathSoluce = secondPathAlgo.run();
+
+            if (algorithmSoluce.isFeasible()) {
+
+                if(firstPathSoluce.isFeasible() && secondPathSoluce.isFeasible()) {
+
+                    //Compute costs of each path
+                    //We use BigDecimal to prevent arithmetic error due to the addition of doubles
+                    BigDecimal soluceCost = BigDecimal.ZERO;
+                    for (Arc a : algorithmSoluce.getPath().getArcs())
+                        soluceCost = soluceCost.add(BigDecimal.valueOf(inspector.getCost(a)));
+
+                    BigDecimal firstPathCost = BigDecimal.ZERO;
+                    for (Arc a : firstPathSoluce.getPath().getArcs())
+                        firstPathCost = firstPathCost.add(BigDecimal.valueOf(inspector.getCost(a)));
+
+                    BigDecimal secondPathCost = BigDecimal.ZERO;
+                    for (Arc a : secondPathSoluce.getPath().getArcs())
+                        secondPathCost = secondPathCost.add(BigDecimal.valueOf(inspector.getCost(a)));
+
+                    BigDecimal altPathCost = firstPathCost.add(secondPathCost);
+
+                    //altPathCost should be greater than or equal to soluce cost
+                    assertTrue(altPathCost.compareTo(soluceCost) >= 0);
+                }
+
+            } else {
+                //If the solution is not feasible, then it means thatat least one of this paths
+                //is not feasible, else it would mean than the solution is feasible
+                assertTrue(!firstPathSoluce.isFeasible()
+                        || !secondPathSoluce.isFeasible());
+            }
+        }
     }
 
     @After
