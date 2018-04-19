@@ -94,4 +94,7 @@ public abstract class AbstractInputData {
         return this.arcInspector.isAllowed(arc);
     }
 
+    public ArcInspector getArcInspector() {
+        return arcInspector;
+    }
 }
