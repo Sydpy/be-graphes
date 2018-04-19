@@ -3,7 +3,6 @@ package org.insa.algo.shortestpath;
 import org.insa.algo.AbstractSolution.Status;
 import org.insa.algo.utils.BinaryHeap;
 import org.insa.algo.utils.Label;
-import org.insa.algo.utils.PriorityQueue;
 import org.insa.graph.Arc;
 import org.insa.graph.Graph;
 import org.insa.graph.Node;
@@ -57,7 +56,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 
 			//Extract min from priority queue
 			min = queue.deleteMin();
-			minNode = min.value;
+			minNode = min.data;
 			minDist = min.label;
 
 			//For each arc from the min
