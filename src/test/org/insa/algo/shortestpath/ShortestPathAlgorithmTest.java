@@ -105,7 +105,7 @@ public abstract class ShortestPathAlgorithmTest {
 
         Random rand = new Random();
         for (ArcInspector inspector : ArcInspectorFactory.getAllFilters()) {
-            for (int i = 0; i < 20; i++) {
+            for (int i = 0; i < 5; i++) {
 
                 //Get two random nodes that must be different
                 Node origin = graph2.get(rand.nextInt(graph2Size));
@@ -171,7 +171,7 @@ public abstract class ShortestPathAlgorithmTest {
         int graphSize = graph.size();
 
         Random rand = new Random();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 5; i++) {
 
             //Get a random third node different from origin and destination
             Node thirdNode = data.getGraph().get(rand.nextInt(graphSize));
