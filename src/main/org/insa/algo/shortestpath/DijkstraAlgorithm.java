@@ -57,7 +57,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 			//Extract min from priority queue
 			min = queue.deleteMin();
 			minNode = min.data;
-			minDist = min.label;
+			minDist = min.cost;
 
 			//For each arc from the min
 			for (Arc a : minNode) {
@@ -84,7 +84,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 					distances[dest.getId()] = newDist;
 					predecessorArcs[dest.getId()] = a;
 
-					//(Re)Insert the label concerning this arc with new distance
+					//(Re)Insert the cost concerning this arc with new distance
 					queue.insert(new Label<>(dest, newDist));
 				}
 			}
