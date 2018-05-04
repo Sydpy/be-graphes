@@ -16,13 +16,4 @@ public class AStarAlgorithm extends DijkstraAlgorithm {
         super(data);
     }
 
-    @Override
-	protected double computeCost(double minCost, Arc a) {
-		Point current = a.getDestination().getPoint();
-		Point destination = ((ShortestPathData) data).getDestination().getPoint();
-		
-		double distance = Point.distance(current, destination);
-		
-		return minCost + data.getCost(a) + distance;
-	}
 }

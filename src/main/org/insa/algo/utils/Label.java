@@ -1,17 +1,19 @@
 package org.insa.algo.utils;
 
-public class Label<E, F extends Comparable<F>> implements Comparable<Label<E, F>>{
+import org.insa.graph.Node;
 
-    public E data;
+public class Label<F extends Comparable<F>> implements Comparable<Label<F>>{
+
+    public Node node;
     public F cost;
 
-    public Label(E data, F label) {
-        this.data = data;
-        this.cost = label;
+    public Label(Node node, F cost) {
+        this.node = node;
+        this.cost = cost;
     }
 
     @Override
-    public int compareTo(Label<E, F> efLabel) {
+    public int compareTo(Label<F> efLabel) {
         return cost.compareTo(efLabel.cost);
     }
 
@@ -21,7 +23,7 @@ public class Label<E, F extends Comparable<F>> implements Comparable<Label<E, F>
 
         if (o instanceof Label) {
             Label l = (Label) o;
-            return l.data.equals(data) && l.cost.equals(cost);
+            return l.node.equals(node) && l.cost.equals(cost);
         }
 
         return false;
