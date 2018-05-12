@@ -27,27 +27,13 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 
 		Label[] labels = new Label[nbNodes];
 		Arrays.fill(labels, null);
-		labels[originId] = new Label<Double>(data.getOrigin(), 0.);
+		labels[originId] = new Label(data.getOrigin(), 0.);
 
 		return labels;
 	}
 
-	protected BinaryHeap initBinaryHeap(Label[] labels) {
-		ShortestPathData data = getInputData();
-		Graph graph = data.getGraph();
-
-		assert labels.length == graph.size();
-
-		int originId = data.getOrigin().getId();
-
-		BinaryHeap queue = new BinaryHeap<Label<Double>>();
-		queue.insert(labels[originId]);
-
-		return queue;
-	}
-
 	protected Label computeLabelForDest(Arc a, Label originLabel) {
-		return new Label<>(a.getDestination(), data.getCost(a) + (double) originLabel.cost);
+		return new Label(a.getDestination(), data.getCost(a) + originLabel.getCost());
 	}
 
 	@Override
@@ -66,7 +52,10 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 		Label[] labels = initLabels();
 
 		//Initialize PriorityQueue
-		BinaryHeap queue = initBinaryHeap(labels);
+		int originId = data.getOrigin().getId();
+		BinaryHeap queue = new BinaryHeap<Label>();
+		queue.insert(labels[originId]);
+
 
 		// Notify observers about the first event (origin processed).
 		notifyOriginProcessed(data.getOrigin());
@@ -80,7 +69,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 
 			//Extract min from priority queue
 			min = (Label) queue.deleteMin();
-			minNode = min.node;
+			minNode = min.getNode();
 
 			//For each arc from the min
 			for (Arc a : minNode) {
