@@ -9,7 +9,6 @@ import org.insa.graph.Node;
 import org.insa.graph.Path;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 
 public class DijkstraAlgorithm extends ShortestPathAlgorithm {
@@ -26,14 +25,15 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 		int originId = data.getOrigin().getId();
 
 		Label[] labels = new Label[nbNodes];
-		Arrays.fill(labels, null);
-		labels[originId] = new Label(data.getOrigin(), 0.);
+
+		for (int i = 0; i < labels.length; i++) {
+			Node n = graph.get(i);
+			labels[i] = new Label(n, Double.POSITIVE_INFINITY);
+		}
+
+		labels[originId].setCost(0);
 
 		return labels;
-	}
-
-	protected Label computeLabelForDest(Arc a, Label originLabel) {
-		return new Label(a.getDestination(), data.getCost(a) + originLabel.getCost());
 	}
 
 	@Override
@@ -53,9 +53,8 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 
 		//Initialize PriorityQueue
 		int originId = data.getOrigin().getId();
-		BinaryHeap queue = new BinaryHeap<Label>();
+		BinaryHeap<Label> queue = new BinaryHeap<>();
 		queue.insert(labels[originId]);
-
 
 		// Notify observers about the first event (origin processed).
 		notifyOriginProcessed(data.getOrigin());
@@ -68,8 +67,9 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 		while (!queue.isEmpty() && !data.getDestination().equals(minNode)) {
 
 			//Extract min from priority queue
-			min = (Label) queue.deleteMin();
+			min = queue.deleteMin();
 			minNode = min.getNode();
+			min.setMarked();
 
 			//For each arc from the min
 			for (Arc a : minNode) {
@@ -77,28 +77,29 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 				if (!data.isAllowed(a)) continue;
 
 				Node destNode = a.getDestination();
+				Label oldLabel = labels[destNode.getId()];
+
+				if (oldLabel.isMarked()) continue;
 
 				//Compute new distance from origin via minNode
-				Label oldLabel = labels[destNode.getId()];
-				Label newLabel = computeLabelForDest(a, labels[minNode.getId()]);
+				double newCost = min.getCost() + data.getCost(a);
 
-				if (oldLabel == null || newLabel.compareTo(oldLabel) < 0) {
+				if (oldLabel.getCost() > newCost) {
 
-					//If old label is null, it means we just
+					//If old label cost is infinite, it means we just
 					//encountered this node, no need to remove it
-					if (oldLabel == null) {
+					if (Double.isInfinite(oldLabel.getCost())) {
 						notifyNodeReached(destNode);
 					} else {
 						queue.remove(oldLabel);
 					}
 
+					oldLabel.setCost(newCost);
+
 					//Update distance and predecessor
-					labels[destNode.getId()] = newLabel;
 					predecessorArcs[destNode.getId()] = a;
 
-					//(Re)Insert the cost concerning this arc with new distance
-					queue.insert(newLabel);
-
+					queue.insert(oldLabel);
 				}
 			}
 		}

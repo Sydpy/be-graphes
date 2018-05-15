@@ -1,5 +1,7 @@
 package org.insa.algo.shortestpath;
 
+import org.insa.algo.AbstractInputData;
+import org.insa.algo.ArcInspector;
 import org.insa.algo.utils.Label;
 import org.insa.algo.utils.LabelStar;
 import org.insa.graph.Arc;
@@ -24,31 +26,36 @@ public class AStarAlgorithm extends DijkstraAlgorithm {
         int originId = data.getOrigin().getId();
 
         Label[] labels = new LabelStar[nbNodes];
-        Arrays.fill(labels, null);
-        labels[originId] = new LabelStar(data.getOrigin(), 0,0);
+
+        for (int i = 0; i < labels.length; i++) {
+            Node n = graph.get(i);
+            labels[i] = new LabelStar(n, Double.POSITIVE_INFINITY, computeHeuristic(n));
+        }
+
+        labels[originId].setCost(0);
 
         return labels;
     }
 
-    @Override
-    protected Label computeLabelForDest(Arc a, Label originLabel) {
+    private double computeHeuristic(Node node) {
 
-        LabelStar originLabelStar = (LabelStar) originLabel;
+        AbstractInputData.Mode mode = getInputData().getArcInspector().getMode();
 
-        double cost = data.getCost(a) + originLabel.getCost() - originLabelStar.getHeuristic();
-
-        return new LabelStar(a.getDestination(),
-                cost, computeHeuristic(a.getDestination()));
-    }
-
-    private double computeHeuristic(Node origin) {
-
-        Point originPoint = origin.getPoint();
+        Point originPoint = node.getPoint();
         Point destPoint = getInputData().getDestination().getPoint();
 
         if (originPoint == null || destPoint == null)
             return 0.;
 
-        return originPoint.distanceTo(destPoint);
+        double distance = originPoint.distanceTo(destPoint);
+
+        switch (mode) {
+            case LENGTH:
+                return distance;
+            case TIME:
+                return distance / (double) (1000 * getInputData().getMaximumSpeed());
+        }
+
+        return 0.;
     }
 }

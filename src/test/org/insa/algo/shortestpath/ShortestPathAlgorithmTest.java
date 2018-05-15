@@ -87,12 +87,12 @@ public abstract class ShortestPathAlgorithmTest {
 
         Graph graph1 = new Graph("ID", "", Arrays.asList(nodes), null);
 
-        for (ArcInspector inspector : ArcInspectorFactory.getAllFilters()) {
-            for (int i = 0; i < 6; i++) {
-                for (int j = 0; j < 6; j++) {
-                    if (i != j)
-                        data.add(new ShortestPathData(graph1, nodes[i], nodes[j], inspector));
-                }
+        ArcInspector insp = ArcInspectorFactory.getAllFilters().get(0);
+
+        for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < 6; j++) {
+                if (i != j)
+                    data.add(new ShortestPathData(graph1, nodes[i], nodes[j], insp));
             }
         }
 
@@ -105,7 +105,7 @@ public abstract class ShortestPathAlgorithmTest {
 
         Random rand = new Random();
         for (ArcInspector inspector : ArcInspectorFactory.getAllFilters()) {
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 8; i++) {
 
                 //Get two random nodes that must be different
                 Node origin = graph2.get(rand.nextInt(graph2Size));
@@ -149,8 +149,15 @@ public abstract class ShortestPathAlgorithmTest {
             Path oraclePath = oracleSoluce.getPath();
             Path algoritmPath = algorithmSoluce.getPath();
 
-            //Their path should be the same
-            assertArrayEquals(oraclePath.getArcs().toArray(), algoritmPath.getArcs().toArray());
+            BigDecimal oracleCost = BigDecimal.ZERO;
+            for (Arc a : oraclePath.getArcs())
+                oracleCost = oracleCost.add(BigDecimal.valueOf(data.getArcInspector().getCost(a)));
+
+            BigDecimal algorithmCost = BigDecimal.ZERO;
+            for (Arc a : algoritmPath.getArcs())
+                algorithmCost = algorithmCost.add(BigDecimal.valueOf(data.getArcInspector().getCost(a)));
+
+            assertEquals(oracleCost, algorithmCost);
         }
     }
 

@@ -11,24 +11,29 @@ public class LabelStar extends Label {
         this.heuristic = heuristic;
     }
 
-    public double getHeuristic() {
+    private double getHeuristic() {
         return heuristic;
     }
 
-    @Override
-    public double getCost() {
-        return super.getCost() + heuristic;
+    private double getTotalCost() {
+        return getCost() + getHeuristic();
     }
 
     @Override
     public int compareTo(Label label) {
-        int comp = super.compareTo(label);
 
-        if (comp == 0 && label instanceof LabelStar) {
-            return Double.compare(heuristic, ((LabelStar) label).heuristic);
+        if (label instanceof LabelStar) {
+            LabelStar labelStar = (LabelStar) label;
+
+            int comp = Double.compare(getTotalCost(), labelStar.getTotalCost());
+
+            if (comp == 0) {
+                comp = Double.compare(getHeuristic(), labelStar.getHeuristic());
+            }
+
+            return comp;
         }
 
-        return comp;
+        return super.compareTo(label);
     }
-
 }
