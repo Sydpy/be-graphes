@@ -10,11 +10,31 @@ import org.insa.graph.Path;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 
+	private Arc[] predecessorArcs;
+	private Label[] labels;
+	private BinaryHeap<Label> queue;
+
 	public DijkstraAlgorithm(ShortestPathData data) {
 		super(data);
+
+		Graph graph = data.getGraph();
+		int graphSize = graph.size();
+
+		// Initialize array of predecessors.
+		this.predecessorArcs = new Arc[graphSize];
+
+		// Initialize array of distances.
+		this.labels = initLabels();
+
+		//Initialize PriorityQueue
+		int originId = data.getOrigin().getId();
+		this.queue = new BinaryHeap<>();
+		this.queue.insert(labels[originId]);
 	}
 
 	protected Label[] initLabels() {
@@ -43,32 +63,52 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 		ShortestPathData data = getInputData();
 		Graph graph = data.getGraph();
 
-		final int nbNodes = graph.size();
-
-		// Initialize array of predecessors.
-		Arc[] predecessorArcs = new Arc[nbNodes];
-
-		// Initialize array of distances.
-		Label[] labels = initLabels();
-
-		//Initialize PriorityQueue
-		int originId = data.getOrigin().getId();
-		BinaryHeap<Label> queue = new BinaryHeap<>();
-		queue.insert(labels[originId]);
-
 		// Notify observers about the first event (origin processed).
 		notifyOriginProcessed(data.getOrigin());
 
 		//Get min of our queue
-		Label min;
-		Node minNode = null;
+		Node minNode;
+
+		do {
+			minNode = step();
+		} while(minNode != null && !data.getDestination().equals(minNode));
+
+		ShortestPathSolution solution;
+
+		// Destination has no predecessor, the solution is infeasible...
+		if (predecessorArcs[data.getDestination().getId()] == null) {
+			solution = new ShortestPathSolution(data, Status.INFEASIBLE);
+		} else {
+
+			// The destination has been found, notify the observers.
+			notifyDestinationReached(data.getDestination());
+
+			// Create the path from the array of predecessors...
+			ArrayList<Arc> arcs = new ArrayList<>();
+			Arc arc = predecessorArcs[data.getDestination().getId()];
+			while (arc != null) {
+				arcs.add(arc);
+				arc = predecessorArcs[arc.getOrigin().getId()];
+			}
+
+			// Reverse the path...
+			Collections.reverse(arcs);
+
+			// Create the final solution.
+			solution = new ShortestPathSolution(data, Status.OPTIMAL, new Path(graph, arcs));
+		}
+
+		return solution;
+	}
+
+	public Node step() {
 
 		//Do this while our queue is not empty or the destination is not the min
-		while (!queue.isEmpty() && !data.getDestination().equals(minNode)) {
+		if (!queue.isEmpty()) {
 
 			//Extract min from priority queue
-			min = queue.deleteMin();
-			minNode = min.getNode();
+			Label min = queue.deleteMin();
+			Node minNode = min.getNode();
 			min.setMarked();
 
 			//For each arc from the min
@@ -102,34 +142,10 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 					queue.insert(oldLabel);
 				}
 			}
+
+			return minNode;
 		}
 
-		ShortestPathSolution solution;
-
-		// Destination has no predecessor, the solution is infeasible...
-		if (predecessorArcs[data.getDestination().getId()] == null) {
-			solution = new ShortestPathSolution(data, Status.INFEASIBLE);
-		} else {
-
-			// The destination has been found, notify the observers.
-			notifyDestinationReached(data.getDestination());
-
-			// Create the path from the array of predecessors...
-			ArrayList<Arc> arcs = new ArrayList<>();
-			Arc arc = predecessorArcs[data.getDestination().getId()];
-			while (arc != null) {
-				arcs.add(arc);
-				arc = predecessorArcs[arc.getOrigin().getId()];
-			}
-
-			// Reverse the path...
-			Collections.reverse(arcs);
-
-			// Create the final solution.
-			solution = new ShortestPathSolution(data, Status.OPTIMAL, new Path(graph, arcs));
-		}
-
-		return solution;
+		return null;
 	}
-
 }

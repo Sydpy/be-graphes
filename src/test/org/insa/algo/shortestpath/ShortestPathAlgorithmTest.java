@@ -98,7 +98,7 @@ public abstract class ShortestPathAlgorithmTest {
 
         //Build random ShortestPathData from a map
         GraphReader reader = new BinaryGraphReader(
-                new DataInputStream(new BufferedInputStream(new FileInputStream("res/Maps/bordeaux.mapgr"))));
+                new DataInputStream(new BufferedInputStream(new FileInputStream("Maps/bordeaux.mapgr"))));
 
         Graph graph2 = reader.read();
         int graph2Size = graph2.size();
