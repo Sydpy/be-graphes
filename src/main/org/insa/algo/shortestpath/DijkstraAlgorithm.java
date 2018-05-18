@@ -148,4 +148,8 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 
 		return null;
 	}
+
+	public double getMinCost() {
+		return queue.findMin().getCost();
+	}
 }
