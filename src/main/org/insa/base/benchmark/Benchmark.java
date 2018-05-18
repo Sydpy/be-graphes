@@ -84,13 +84,17 @@ public class Benchmark {
         bo.write("file;nb path".getBytes());
         for (String algorithmName : algorithmNames) {
             String algorithmLengthHeader = ";" + algorithmName + " LENGTH";
-            String algorithmTimeHeader = ";" + algorithmName + " TIME";
             bo.write(algorithmLengthHeader.getBytes());
+        }
+        for (String algorithmName : algorithmNames) {
+            String algorithmTimeHeader = ";" + algorithmName + " TIME";
             bo.write(algorithmTimeHeader.getBytes());
         }
         bo.write("\n".getBytes());
 
         for (final File fileEntry : Objects.requireNonNull(csvFolder.listFiles())) {
+
+            if (fileEntry.isDirectory()) continue;
 
             String filename = fileEntry.getName();
             if (filename.endsWith(".csv")) {
@@ -102,7 +106,7 @@ public class Benchmark {
                     GraphReader reader = new BinaryGraphReader(
                             new DataInputStream(
                                     new BufferedInputStream(
-                                            new FileInputStream("Maps/" + mapName + ".mapgr"))));
+                                            new FileInputStream("Maps/" + mapName.toLowerCase() + ".mapgr"))));
                     Graph graph = reader.read();
 
                     int nbEntries = 0;
@@ -138,7 +142,8 @@ public class Benchmark {
                                     totalDurations.getOrDefault(algorithmName + " LENGTH", Duration.ZERO);
                             totalDuration = totalDuration.plus(duration);
                             totalDurations.put(algorithmName + "LENGTH", totalDuration);
-
+                        }
+                        for (String algorithmName : algorithmNames) {
                             //Algorithm for time
                             duration = doBenchmark(dataTime, algorithmName);
                             totalDuration =
