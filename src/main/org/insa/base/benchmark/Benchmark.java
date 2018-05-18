@@ -101,6 +101,8 @@ public class Benchmark {
 
                 String mapName = filename.split("_")[0];
 
+                System.out.println("Benchmarking " + filename);
+
                 try {
                     // Get related graph
                     GraphReader reader = new BinaryGraphReader(
@@ -167,6 +169,8 @@ public class Benchmark {
 
                     bo.write(resultEntry.toString().getBytes());
                     bo.flush();
+
+                    System.out.println("Done benchmarking " + filename);
 
                 } catch (IOException e) {
                     e.printStackTrace();
