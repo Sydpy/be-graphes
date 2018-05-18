@@ -120,7 +120,7 @@ public class GenerateBenchmarkData {
     public static void main(String[] args) throws IOException, InterruptedException {
 
         if (args.length < 1) {
-            System.out.println("args : <csv input folder>");
+            System.out.println("args : <maps folder>");
             System.exit(0);
         }
 
