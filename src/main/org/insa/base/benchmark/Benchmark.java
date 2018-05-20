@@ -2,9 +2,10 @@ package org.insa.base.benchmark;
 
 import com.sun.org.apache.xml.internal.security.algorithms.Algorithm;
 import org.insa.algo.*;
+import org.insa.algo.shortestpath.AStarAlgorithm;
+import org.insa.algo.shortestpath.DijkstraAlgorithm;
 import org.insa.algo.shortestpath.ShortestPathAlgorithm;
 import org.insa.algo.shortestpath.ShortestPathData;
-import org.insa.algo.shortestpath.ShortestPathSolution;
 import org.insa.graph.Arc;
 import org.insa.graph.Graph;
 import org.insa.graph.GraphStatistics;
@@ -18,9 +19,9 @@ import java.util.*;
 
 public class Benchmark {
 
-    private static String resultsFilename = "BenchmarkResults.csv";
+    private static String RESULTS_FILENAME = "BenchmarkResults.csv";
 
-    private static ArcInspector inspectorLength = new ArcInspector() {
+    private static final ArcInspector inspectorLength = new ArcInspector() {
         @Override
         public boolean isAllowed(Arc arc) {
             return true;
@@ -40,9 +41,14 @@ public class Benchmark {
         public AbstractInputData.Mode getMode() {
             return AbstractInputData.Mode.LENGTH;
         }
+
+        @Override
+        public String toString() {
+            return "LENGTH";
+        }
     };
 
-    private static ArcInspector inspectorTime = new ArcInspector() {
+    private static final ArcInspector inspectorTime = new ArcInspector() {
         @Override
         public boolean isAllowed(Arc arc) {
             return true;
@@ -62,7 +68,15 @@ public class Benchmark {
         public AbstractInputData.Mode getMode() {
             return AbstractInputData.Mode.TIME;
         }
+
+        @Override
+        public String toString() {
+            return "TIME";
+        }
     };
+
+    private static final String[] ALGORITHMS = { "Dijkstra", "A*"};
+    private static final ArcInspector[] INSPECTORS = { inspectorTime, inspectorLength};
 
     public static void main(String[] args) throws Exception {
 
@@ -78,19 +92,21 @@ public class Benchmark {
         File csvFolder = new File(args[0]);
 
         BufferedOutputStream bo
-                = new BufferedOutputStream(new FileOutputStream(resultsFilename));
+                = new BufferedOutputStream(new FileOutputStream(RESULTS_FILENAME));
 
         // Write results file header
-        bo.write("file;nb path".getBytes());
-        for (String algorithmName : algorithmNames) {
-            String algorithmLengthHeader = ";" + algorithmName + " LENGTH";
-            bo.write(algorithmLengthHeader.getBytes());
+        StringBuilder header = new StringBuilder();
+        header.append("file;nb path");
+        for (String algorithm : ALGORITHMS) {
+            for (ArcInspector inspector : INSPECTORS) {
+                header.append(";");
+                header.append(algorithm);
+                header.append(" ");
+                header.append(inspector.toString());
+            }
         }
-        for (String algorithmName : algorithmNames) {
-            String algorithmTimeHeader = ";" + algorithmName + " TIME";
-            bo.write(algorithmTimeHeader.getBytes());
-        }
-        bo.write("\n".getBytes());
+        header.append("\n");
+        bo.write(header.toString().getBytes());
 
         for (final File fileEntry : Objects.requireNonNull(csvFolder.listFiles())) {
 
@@ -111,8 +127,9 @@ public class Benchmark {
                                             new FileInputStream("Maps/" + mapName.toLowerCase() + ".mapgr"))));
                     Graph graph = reader.read();
 
-                    int nbEntries = 0;
                     Map<String, Duration> totalDurations = new HashMap<>();
+
+                    int nbEntries = 0;
 
                     //Read the csv file
                     BufferedReader br = new BufferedReader(new FileReader(fileEntry));
@@ -125,52 +142,51 @@ public class Benchmark {
 
                         int originID = Integer.parseInt(splitted[0]);
                         int destinationID = Integer.parseInt(splitted[1]);
-                        Node origin = graph.get(originID);
-                        Node destination = graph.get(destinationID);
 
-                        ShortestPathData dataLength =
-                                new ShortestPathData(graph, origin, destination, inspectorLength);
+                        Map<String, Duration> durations = doBenchmark(graph, originID, destinationID);
 
-                        ShortestPathData dataTime =
-                                new ShortestPathData(graph, origin, destination, inspectorTime);
+                        for (String algorithm : ALGORITHMS) {
+                            for (ArcInspector inspector : INSPECTORS) {
 
-                        Duration totalDuration;
-                        Duration duration;
-                        for (String algorithmName : algorithmNames) {
+                                String key = algorithm + " " + inspector.toString();
 
-                            //Algorithm for length
-                            duration = doBenchmark(dataLength, algorithmName);
-                            totalDuration =
-                                    totalDurations.getOrDefault(algorithmName + " LENGTH", Duration.ZERO);
-                            totalDuration = totalDuration.plus(duration);
-                            totalDurations.put(algorithmName + "LENGTH", totalDuration);
-                        }
-                        for (String algorithmName : algorithmNames) {
-                            //Algorithm for time
-                            duration = doBenchmark(dataTime, algorithmName);
-                            totalDuration =
-                                    totalDurations.getOrDefault(algorithmName + " TIME", Duration.ZERO);
-                            totalDuration = totalDuration.plus(duration);
-                            totalDurations.put(algorithmName + "TIME", totalDuration);
+                                Duration totalDuration
+                                        = totalDurations.getOrDefault(key, Duration.ZERO);
+
+                                totalDuration = totalDuration.plus(durations.get(key));
+
+                                totalDurations.put(key, totalDuration);
+                            }
                         }
 
                         nbEntries++;
+                        if (nbEntries % 5 == 0) System.out.println(nbEntries + " entries processed.");
                     }
 
                     StringBuilder resultEntry = new StringBuilder();
                     resultEntry.append(filename);
                     resultEntry.append(";");
                     resultEntry.append(nbEntries);
-                    totalDurations.forEach((k, totalDuration) -> {
-                        resultEntry.append(";");
-                        resultEntry.append((float) totalDuration.getNano() / (float) 10e9);
-                    });
+
+                    for (String algorithm : ALGORITHMS) {
+                        for (ArcInspector inspector : INSPECTORS) {
+
+
+                            String key = algorithm + " " + inspector.toString();
+                            Duration duration = totalDurations.getOrDefault(key, Duration.ZERO);
+
+                            double total = (double) duration.getSeconds() + ((double) duration.getNano() / 10e9);
+
+                            resultEntry.append(";");
+                            resultEntry.append(total);
+                        }
+                    }
                     resultEntry.append("\n");
 
                     bo.write(resultEntry.toString().getBytes());
                     bo.flush();
 
-                    System.out.println("Done benchmarking " + filename);
+                    System.out.println("Done benchmarking " + filename + " (" + nbEntries + " entries).");
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -180,18 +196,26 @@ public class Benchmark {
         bo.close();
     }
 
-    private static Duration doBenchmark(ShortestPathData data, String algorithmName)
-            throws Exception {
+    private static Map<String, Duration> doBenchmark(Graph graph, int originID, int destinationID) throws Exception {
 
+        Map<String, Duration> results = new HashMap<>();
 
-        Class<? extends AbstractAlgorithm<?>> algorithmClass =
-                AlgorithmFactory.getAlgorithmClass(ShortestPathAlgorithm.class, algorithmName);
+        Node origin = graph.get(originID);
+        Node destination = graph.get(destinationID);
 
-        AbstractAlgorithm<?> algorithm =
-                AlgorithmFactory.createAlgorithm(algorithmClass, data);
+        for (String algorithm : ALGORITHMS) {
+            for (ArcInspector inspector : INSPECTORS) {
 
-        AbstractSolution solution = algorithm.run();
+                ShortestPathData data = new ShortestPathData(graph, origin, destination, inspector);
+                Class<? extends AbstractAlgorithm<?>> algorithmClass
+                        = AlgorithmFactory.getAlgorithmClass(ShortestPathAlgorithm.class, algorithm);
 
-        return solution.getSolvingTime();
+                AbstractSolution solution = AlgorithmFactory.createAlgorithm(algorithmClass, data).run();
+
+                results.put(algorithm + " " + inspector.toString(), solution.getSolvingTime());
+            }
+        }
+
+        return results;
     }
 }

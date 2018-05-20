@@ -152,4 +152,8 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 	public double getMinCost() {
 		return queue.findMin().getCost();
 	}
+
+	public Label[] getLabels() {
+		return labels;
+	}
 }
