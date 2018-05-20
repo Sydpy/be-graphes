@@ -1,81 +1,41 @@
-# Graph & Algorithm project &mdash; INSA Toulouse
+# BE Graphes INSA Toulouse
 
-## How to start?
+## Auteurs
 
-You will not be able to use this repository to save your work, you need to copy / import / fork it to 
-your favorite Git platform.
+* Sylvain Dupouy
+* Léo Picou
 
-### Importing to [Github](https://github.com), [Bitbucket](https://bitbucket.org) or [Gitlab](https://gitlab.com):
+## Introduction
 
-You first need to register and then log in to the platform you want. The steps to import the project are detailed below:
+Ce bureau d'étude regroupe à la fois la pratique d'un langage orienté objet (Java) ainsi que l'implémentation d'algorithmes relevant de la théorie des graphes. Le projet initial est disponible [ici](https://duckduckgo.com). Les fonctionnalités implémentées sont :
+* L'algorithme de Dijkstra
+* L'algorithme A* (en version Dijkstra)
+* Un algorithme de résolution du problème d'échange de colis
+* Des tests de validité concernant Dijkstra et A*
+* Des tests de performance concernant Dijkstra et A*
 
-#### Github
+## Conception
 
-1. In the upper-right corner of any page, click the **"+"** icon, then click **Import repository**, or go to [https://github.com/new/import](https://github.com/new/import). 
+### Structures de données
 
-2. Paste the following URL in the first input:
- 
-    [https://gitea.typename.fr/INSA/be-graphes.git](https://gitea.typename.fr/INSA/be-graphes.git)
+### Dijkstra
 
-3. Choose the name you want for the repository.
+### A*-like Dijkstra
 
-4. Click *Begin import*.
+## Tests de validité
 
-5. Wait for completion... Done!
+### Génération des données de test
 
-#### Bitbucket
+### Tests avec oracle
 
-1. On the left panel of any page, click the **"+"** icon, then **Repository**, and then **Import**, or directly go to [https://bitbucket.org/repo/import](https://bitbucket.org/repo/import). 
+### Tests sans oracle
 
-2. Paste the following URL in the first input (select Git as source if not already selected):
- 
-    [https://gitea.typename.fr/INSA/be-graphes.git](https://gitea.typename.fr/INSA/be-graphes.git)
+## Tests de performance
 
-3. Choose the name you want for repository, and select Git as the *Version control system*.
+### Organisation des tests
 
-4. Click *Import repository*.
+### Résultats
 
-5. Wait for completion... Done!
+## Problème ouvert : Échange de colis
 
-#### Gitlab
-
-1. In the upper-right corner of any page, click the **"+"** icon, then **New project**, or directly go to [https://gitlab.com/projects/new](https://gitlab.com/projects/new).
-
-2. Select the **Import project** tab, and then click **Repo by URL** (right-most option).
-
-
-3. Paste the following URL in the first input:
- 
-    [https://gitea.typename.fr/INSA/be-graphes.git](https://gitea.typename.fr/INSA/be-graphes.git)
-    
-4. Choose the name you want for the repository.
-
-5. Click *Create project*.
-
-6. Wait for completion... Done!
-
-### Importing to another repository provider *[not recommended]*:
-
-1. Create a new **empty** repository (no README, no LICENSE) on your provider. Let's assume the URL of your repository is `$URL_REPOSITORY`.
-
-2. Clone this repository somewhere:
-
-    ```bash
-	git clone https://gitea.typename.fr/INSA/be-graphes.git
-	```
-
-3. Go inside the newly cloned repository and update the **remote**:
-
-    ```bash
-	cd be-graphes
-	git remote remove origin
-	git remote add origin $URL_REPOSITORY
-	```
-
-4. Push to your repository:
-
-    ```bash
-	push -u origin master
-	```
-	
-Another way is to do a bare clone and then mirror it to your repository: [https://help.github.com/articles/importing-a-git-repository-using-the-command-line/](https://help.github.com/articles/importing-a-git-repository-using-the-command-line/)
+## Conclusion
