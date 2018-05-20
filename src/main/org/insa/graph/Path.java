@@ -253,7 +253,7 @@ public class Path {
     	
     	Node prevDestination = this.getOrigin();
     	for(Arc a : arcs) {
-    		if(a.getOrigin() != prevDestination)
+    		if(!a.getOrigin().equals(prevDestination))
     			return false;
     		prevDestination = a.getDestination();  
     	}

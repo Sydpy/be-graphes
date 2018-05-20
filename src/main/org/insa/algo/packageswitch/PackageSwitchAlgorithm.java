@@ -1,6 +1,7 @@
 package org.insa.algo.packageswitch;
 
 import org.insa.algo.AbstractAlgorithm;
+import org.insa.graph.Node;
 
 public abstract class PackageSwitchAlgorithm extends AbstractAlgorithm<PackageSwitchObserver> {
 
@@ -26,4 +27,15 @@ public abstract class PackageSwitchAlgorithm extends AbstractAlgorithm<PackageSw
         return (PackageSwitchData) super.getInputData();
     }
 
+    protected void notifyNodeReached(Node none, int count) {
+        for (PackageSwitchObserver observer : observers) {
+            observer.notifyNodeReached(none, count);
+        }
+    }
+
+    protected void notifyMeetingReached(Node node) {
+        for (PackageSwitchObserver observer : observers) {
+            observer.notifyMeetingReached(node);
+        }
+    }
 }

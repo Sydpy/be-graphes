@@ -46,7 +46,7 @@ import javax.swing.border.EmptyBorder;
 import org.insa.algo.AbstractSolution;
 import org.insa.algo.AlgorithmFactory;
 import org.insa.algo.carpooling.CarPoolingAlgorithm;
-import org.insa.algo.packageswitch.PackageSwitchAlgorithm;
+import org.insa.algo.packageswitch.*;
 import org.insa.algo.shortestpath.ShortestPathAlgorithm;
 import org.insa.algo.shortestpath.ShortestPathData;
 import org.insa.algo.shortestpath.ShortestPathGraphicObserver;
@@ -258,8 +258,64 @@ public class MainWindow extends JFrame {
                 "Origin Car", "Origin Pedestrian", "Destination Car", "Destination Pedestrian" },
                 true);
 
-        psPanel = new AlgorithmPanel(this, PackageSwitchAlgorithm.class, "Car-Pooling",
-                new String[]{ "Oribin A", "Origin B", "Destination A", "Destination B" }, true);
+        psPanel = new AlgorithmPanel(this, PackageSwitchAlgorithm.class, "Package Switch",
+                new String[]{ "Origin A", "Origin B", "Destination A", "Destination B" }, true);
+        psPanel.addStartActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                StartActionEvent evt = (StartActionEvent) e;
+                PackageSwitchData data = new PackageSwitchData(
+                        graph,
+                        evt.getNodes().get(0),
+                        evt.getNodes().get(1),
+                        evt.getNodes().get(2),
+                        evt.getNodes().get(3),
+                        evt.getArcFilter());
+
+                PackageSwitchAlgorithm psAlgorithm = null;
+                try {
+                    psAlgorithm = (PackageSwitchAlgorithm) AlgorithmFactory
+                            .createAlgorithm(evt.getAlgorithmClass(), data);
+                }
+                catch (Exception e1) {
+                    JOptionPane.showMessageDialog(MainWindow.this,
+                            "An error occurred while creating the specified algorithm.",
+                            "Internal error: Algorithm instantiation failure",
+                            JOptionPane.ERROR_MESSAGE);
+                    e1.printStackTrace();
+                    return;
+                }
+
+                spPanel.setEnabled(false);
+
+                if (evt.isGraphicVisualizationEnabled()) {
+                    psAlgorithm.addObserver(new PackageSwitchGraphicObserver(drawing));
+                }
+                if (evt.isTextualVisualizationEnabled()) {
+                    psAlgorithm.addObserver(new PackageSwitchTextObserver(printStream));
+                }
+
+                final PackageSwitchAlgorithm copyAlgorithm = psAlgorithm;
+                launchThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Run the algorithm.
+                        PackageSwitchSolution solution = copyAlgorithm.run();
+                        // Add the solution to the solution panel (but do not display
+                        // overlay).
+                        psPanel.solutionPanel.addSolution(solution, false);
+                        // If the solution is feasible, add the path to the path panel.
+                        if (solution.isFeasible()) {
+                            pathPanel.addPath(solution.getPath1());
+                            pathPanel.addPath(solution.getPath2());
+                        }
+                        // Show the solution panel and enable the shortest-path panel.
+                        psPanel.solutionPanel.setVisible(true);
+                        psPanel.setEnabled(true);
+                    }
+                });
+            }
+        });
 
         // add algorithm panels
         algoPanels.add(wccPanel);

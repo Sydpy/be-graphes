@@ -75,27 +75,16 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 
 		ShortestPathSolution solution;
 
+		Path path;
 		// Destination has no predecessor, the solution is infeasible...
-		if (predecessorArcs[data.getDestination().getId()] == null) {
+		if ((path = getPathTo(data.getDestination())) == null) {
 			solution = new ShortestPathSolution(data, Status.INFEASIBLE);
 		} else {
 
-			// The destination has been found, notify the observers.
 			notifyDestinationReached(data.getDestination());
 
-			// Create the path from the array of predecessors...
-			ArrayList<Arc> arcs = new ArrayList<>();
-			Arc arc = predecessorArcs[data.getDestination().getId()];
-			while (arc != null) {
-				arcs.add(arc);
-				arc = predecessorArcs[arc.getOrigin().getId()];
-			}
-
-			// Reverse the path...
-			Collections.reverse(arcs);
-
 			// Create the final solution.
-			solution = new ShortestPathSolution(data, Status.OPTIMAL, new Path(graph, arcs));
+			solution = new ShortestPathSolution(data, Status.OPTIMAL, path);
 		}
 
 		return solution;
@@ -150,10 +139,31 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 	}
 
 	public double getMinCost() {
-		return queue.findMin().getCost();
+		return queue.isEmpty() ? Double.POSITIVE_INFINITY : queue.findMin().getCost();
 	}
 
 	public Label[] getLabels() {
 		return labels;
+	}
+
+	public Arc[] getPredecessorArcs() {
+		return predecessorArcs;
+	}
+
+	public Path getPathTo(Node dest) {
+		// The destination has been found, notify the observers.
+
+		// Create the path from the array of predecessors...
+		ArrayList<Arc> arcs = new ArrayList<>();
+		Arc arc = predecessorArcs[dest.getId()];
+		while (arc != null) {
+			arcs.add(arc);
+			arc = predecessorArcs[arc.getOrigin().getId()];
+		}
+
+		// Reverse the path...
+		Collections.reverse(arcs);
+
+		return new Path(data.getGraph(), arcs);
 	}
 }
