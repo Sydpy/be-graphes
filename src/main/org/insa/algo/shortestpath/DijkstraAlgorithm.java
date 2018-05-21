@@ -71,7 +71,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 
 		do {
 			minNode = step();
-		} while(minNode != null && !data.getDestination().equals(minNode));
+		} while(minNode != null && !minNode.equals(data.getDestination()));
 
 		ShortestPathSolution solution;
 
@@ -113,7 +113,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 				//Compute new distance from origin via minNode
 				double newCost = min.getCost() + data.getCost(a);
 
-				if (oldLabel.getCost() > newCost) {
+				if (Double.compare(oldLabel.getCost(), newCost) > 0) {
 
 					//If old label cost is infinite, it means we just
 					//encountered this node, no need to remove it
@@ -151,11 +151,15 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 	}
 
 	public Path getPathTo(Node dest) {
-		// The destination has been found, notify the observers.
+
+		Arc arc = predecessorArcs[dest.getId()];
+
+		//If the algorithm didn't reach the destination, we return null
+		if (arc == null) return null;
 
 		// Create the path from the array of predecessors...
 		ArrayList<Arc> arcs = new ArrayList<>();
-		Arc arc = predecessorArcs[dest.getId()];
+
 		while (arc != null) {
 			arcs.add(arc);
 			arc = predecessorArcs[arc.getOrigin().getId()];

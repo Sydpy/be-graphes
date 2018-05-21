@@ -13,11 +13,6 @@ public class Label implements Comparable<Label> {
         this.cost = cost;
     }
 
-    public Label(Label l) {
-        this.node = l.node;
-        this.cost = l.cost;
-    }
-
     @Override
     public int compareTo(Label label) {
         return Double.compare(cost, label.cost);
@@ -42,4 +37,5 @@ public class Label implements Comparable<Label> {
     public void setMarked() {
         marked = true;
     }
+
 }
