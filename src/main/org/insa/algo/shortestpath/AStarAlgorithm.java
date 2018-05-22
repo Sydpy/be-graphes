@@ -47,7 +47,7 @@ public class AStarAlgorithm extends DijkstraAlgorithm {
         if (originPoint == null || destPoint == null)
             return 0.;
 
-        double distance = originPoint.distanceTo(destPoint);
+        double distance = originPoint.distanceTo(destPoint) * 9d / 10d;
 
         switch (mode) {
             case LENGTH:

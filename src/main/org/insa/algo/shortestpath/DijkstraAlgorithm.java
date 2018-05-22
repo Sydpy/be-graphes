@@ -100,6 +100,8 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 			Node minNode = min.getNode();
 			min.setMarked();
 
+			notifyNodeMarked(minNode);
+
 			//For each arc from the min
 			for (Arc a : minNode) {
 
@@ -113,7 +115,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 				//Compute new distance from origin via minNode
 				double newCost = min.getCost() + data.getCost(a);
 
-				if (Double.compare(oldLabel.getCost(), newCost) > 0) {
+				if (Double.compare(oldLabel.getCost(), newCost) >= 0) {
 
 					//If old label cost is infinite, it means we just
 					//encountered this node, no need to remove it
