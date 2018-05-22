@@ -147,17 +147,16 @@ public abstract class ShortestPathAlgorithmTest {
         if (oracleSoluce.isFeasible() && algorithmSoluce.isFeasible()) {
 
             Path oraclePath = oracleSoluce.getPath();
-            Path algoritmPath = algorithmSoluce.getPath();
+            Path algorithmPath = algorithmSoluce.getPath();
 
-            BigDecimal oracleCost = BigDecimal.ZERO;
-            for (Arc a : oraclePath.getArcs())
-                oracleCost = oracleCost.add(BigDecimal.valueOf(data.getArcInspector().getCost(a)));
-
-            BigDecimal algorithmCost = BigDecimal.ZERO;
-            for (Arc a : algoritmPath.getArcs())
-                algorithmCost = algorithmCost.add(BigDecimal.valueOf(data.getArcInspector().getCost(a)));
-
-            assertEquals(oracleCost, algorithmCost);
+            switch (data.getMode()) {
+                case TIME:
+                    assertEquals(0, Double.compare(oraclePath.getMinimumTravelTime(), algorithmPath.getMinimumTravelTime()));
+                    break;
+                case LENGTH:
+                    assertEquals(0, Double.compare(oraclePath.getLength(), algorithmPath.getLength()));
+                    break;
+            }
         }
     }
 
@@ -199,24 +198,21 @@ public abstract class ShortestPathAlgorithmTest {
 
                 if(firstPathSoluce.isFeasible() && secondPathSoluce.isFeasible()) {
 
-                    //Compute costs of each path
-                    //We use BigDecimal to prevent arithmetic error due to the addition of doubles
-                    BigDecimal soluceCost = BigDecimal.ZERO;
-                    for (Arc a : algorithmSoluce.getPath().getArcs())
-                        soluceCost = soluceCost.add(BigDecimal.valueOf(inspector.getCost(a)));
+                    Path firstPath = firstPathSoluce.getPath();
+                    Path secondPath = secondPathSoluce.getPath();
 
-                    BigDecimal firstPathCost = BigDecimal.ZERO;
-                    for (Arc a : firstPathSoluce.getPath().getArcs())
-                        firstPathCost = firstPathCost.add(BigDecimal.valueOf(inspector.getCost(a)));
+                    Path solucePath = secondPathSoluce.getPath();
 
-                    BigDecimal secondPathCost = BigDecimal.ZERO;
-                    for (Arc a : secondPathSoluce.getPath().getArcs())
-                        secondPathCost = secondPathCost.add(BigDecimal.valueOf(inspector.getCost(a)));
-
-                    BigDecimal altPathCost = firstPathCost.add(secondPathCost);
-
-                    //altPathCost should be greater than or equal to soluce cost
-                    assertTrue(altPathCost.compareTo(soluceCost) >= 0);
+                    switch (data.getMode()) {
+                        case TIME:
+                            assertEquals(1, Double.compare(firstPath.getMinimumTravelTime() + secondPath.getMinimumTravelTime(),
+                                    solucePath.getMinimumTravelTime()));
+                            break;
+                        case LENGTH:
+                            assertEquals(1, Double.compare(firstPath.getLength() + secondPath.getLength(),
+                                    solucePath.getLength()));
+                            break;
+                    }
                 }
 
             } else {
