@@ -31,7 +31,7 @@ public abstract class ShortestPathAlgorithmTest {
     public static Collection<Object> data() throws IOException {
         Collection<Object> data = new ArrayList<>();
 
-        //Construction des ShortestPathData d'un graphe simple
+        //Building a very simple graph with 6 nodes
         Node[] nodes = new Node[6];
         for (int i = 0; i < 6; i++) {
             nodes[i] = new Node(i, null);
@@ -88,7 +88,7 @@ public abstract class ShortestPathAlgorithmTest {
         Graph graph1 = new Graph("ID", "", Arrays.asList(nodes), null);
 
         ArcInspector insp = ArcInspectorFactory.getAllFilters().get(0);
-
+        //For each pari of nodes, create a new test data
         for (int i = 0; i < 6; i++) {
             for (int j = 0; j < 6; j++) {
                 if (i != j)
@@ -126,7 +126,7 @@ public abstract class ShortestPathAlgorithmTest {
     public ShortestPathData data;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
     }
 
     @Test
@@ -149,6 +149,7 @@ public abstract class ShortestPathAlgorithmTest {
             Path oraclePath = oracleSoluce.getPath();
             Path algorithmPath = algorithmSoluce.getPath();
 
+            //Assert that the cost of algo soluce equals the cost of oracle soluce
             switch (data.getMode()) {
                 case TIME:
                     assertEquals(0, Double.compare(oraclePath.getMinimumTravelTime(), algorithmPath.getMinimumTravelTime()));
@@ -194,23 +195,32 @@ public abstract class ShortestPathAlgorithmTest {
             ShortestPathAlgorithm secondPathAlgo = createAlgorithm(secondPathData);
             ShortestPathSolution secondPathSoluce = secondPathAlgo.run();
 
+            //if algorithm soluce is feasible
             if (algorithmSoluce.isFeasible()) {
 
+                //If the two new path are also feasible
                 if(firstPathSoluce.isFeasible() && secondPathSoluce.isFeasible()) {
 
                     Path firstPath = firstPathSoluce.getPath();
                     Path secondPath = secondPathSoluce.getPath();
 
+                    //Alt path is the conncatenation of firstPath and secondPath
+                    //i.e. a -> c -> b
+                    Path altPath = Path.concatenate(firstPath, secondPath);
+
+                    //Soluce path is the direct path a-> b
                     Path solucePath = secondPathSoluce.getPath();
 
+                    //Assert that the cost of the alternate path is at least as big as
+                    //the cost of the direct path
                     switch (data.getMode()) {
                         case TIME:
-                            assertEquals(1, Double.compare(firstPath.getMinimumTravelTime() + secondPath.getMinimumTravelTime(),
-                                    solucePath.getMinimumTravelTime()));
+                            assertTrue(Double.compare(altPath.getMinimumTravelTime(),
+                                    solucePath.getMinimumTravelTime()) >= 0);
                             break;
                         case LENGTH:
-                            assertEquals(1, Double.compare(firstPath.getLength() + secondPath.getLength(),
-                                    solucePath.getLength()));
+                            assertTrue(Double.compare(altPath.getLength(),
+                                    solucePath.getLength()) >= 0);
                             break;
                     }
                 }
@@ -225,6 +235,6 @@ public abstract class ShortestPathAlgorithmTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
     }
 }

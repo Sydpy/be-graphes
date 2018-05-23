@@ -21,6 +21,7 @@ public class Benchmark {
 
     private static String RESULTS_FILENAME = "BenchmarkResults.csv";
 
+    //Inspector for length path finding benchmark
     private static final ArcInspector inspectorLength = new ArcInspector() {
         @Override
         public boolean isAllowed(Arc arc) {
@@ -48,6 +49,7 @@ public class Benchmark {
         }
     };
 
+    //Inspector for time path finding benchmark
     private static final ArcInspector inspectorTime = new ArcInspector() {
         @Override
         public boolean isAllowed(Arc arc) {
@@ -75,6 +77,7 @@ public class Benchmark {
         }
     };
 
+    //Algorithms to benchmark (must match the names given in AlgorithmFactory)
     private static final String[] ALGORITHMS = { "Dijkstra", "A*"};
     private static final ArcInspector[] INSPECTORS = { inspectorTime, inspectorLength};
 
@@ -85,20 +88,18 @@ public class Benchmark {
             System.exit(0);
         }
 
-        //Get all algorithms names
-        Set<String> algorithmNames =
-                AlgorithmFactory.getAlgorithmNames(ShortestPathAlgorithm.class);
-
+        //Folder containing the benchmark input data
         File csvFolder = new File(args[0]);
 
-        BufferedOutputStream bo
+        //Create the file where results are going to be written
+        BufferedOutputStream resultFile
                 = new BufferedOutputStream(new FileOutputStream(RESULTS_FILENAME));
 
         // Write results file header
         StringBuilder header = new StringBuilder();
         header.append("file;nb path");
-        for (String algorithm : ALGORITHMS) {
-            for (ArcInspector inspector : INSPECTORS) {
+        for (ArcInspector inspector : INSPECTORS) {
+            for (String algorithm : ALGORITHMS) {
                 header.append(";");
                 header.append(algorithm);
                 header.append(" ");
@@ -106,8 +107,9 @@ public class Benchmark {
             }
         }
         header.append("\n");
-        bo.write(header.toString().getBytes());
+        resultFile.write(header.toString().getBytes());
 
+        //For each csv input data file
         for (final File fileEntry : Objects.requireNonNull(csvFolder.listFiles())) {
 
             if (fileEntry.isDirectory()) continue;
@@ -127,6 +129,8 @@ public class Benchmark {
                                             new FileInputStream("Maps/" + mapName.toLowerCase() + ".mapgr"))));
                     Graph graph = reader.read();
 
+                    //Associate each algorithm with the total duration it took
+                    //to process each entry
                     Map<String, Duration> totalDurations = new HashMap<>();
 
                     int nbEntries = 0;
@@ -135,6 +139,7 @@ public class Benchmark {
                     BufferedReader br = new BufferedReader(new FileReader(fileEntry));
                     String line;
                     br.readLine();
+                    //For each entry in file
                     while ((line = br.readLine()) != null) {
 
                         //Parse entry
@@ -143,10 +148,13 @@ public class Benchmark {
                         int originID = Integer.parseInt(splitted[0]);
                         int destinationID = Integer.parseInt(splitted[1]);
 
+                        //Associate each algorithm with the duration it took
+                        //to process this entry
                         Map<String, Duration> durations = doBenchmark(graph, originID, destinationID);
 
-                        for (String algorithm : ALGORITHMS) {
-                            for (ArcInspector inspector : INSPECTORS) {
+                        //Add the duration for this entry to the total duration
+                        for (ArcInspector inspector : INSPECTORS) {
+                            for (String algorithm : ALGORITHMS) {
 
                                 String key = algorithm + " " + inspector.toString();
 
@@ -163,14 +171,15 @@ public class Benchmark {
                         if (nbEntries % 5 == 0) System.out.println(nbEntries + " entries processed.");
                     }
 
+                    //After the file as been processed, we can write the results
+                    //in the results file
                     StringBuilder resultEntry = new StringBuilder();
                     resultEntry.append(filename);
                     resultEntry.append(";");
                     resultEntry.append(nbEntries);
 
-                    for (String algorithm : ALGORITHMS) {
-                        for (ArcInspector inspector : INSPECTORS) {
-
+                    for (ArcInspector inspector : INSPECTORS) {
+                        for (String algorithm : ALGORITHMS) {
 
                             String key = algorithm + " " + inspector.toString();
                             Duration duration = totalDurations.getOrDefault(key, Duration.ZERO);
@@ -183,8 +192,8 @@ public class Benchmark {
                     }
                     resultEntry.append("\n");
 
-                    bo.write(resultEntry.toString().getBytes());
-                    bo.flush();
+                    resultFile.write(resultEntry.toString().getBytes());
+                    resultFile.flush();
 
                     System.out.println("Done benchmarking " + filename + " (" + nbEntries + " entries).");
 
@@ -193,7 +202,7 @@ public class Benchmark {
                 }
             }
         }
-        bo.close();
+        resultFile.close();
     }
 
     private static Map<String, Duration> doBenchmark(Graph graph, int originID, int destinationID) throws Exception {
