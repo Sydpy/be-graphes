@@ -1,15 +1,9 @@
 package org.insa.algo.shortestpath;
 
 import org.insa.algo.AbstractInputData;
-import org.insa.algo.ArcInspector;
-import org.insa.algo.utils.Label;
-import org.insa.algo.utils.LabelStar;
-import org.insa.graph.Arc;
 import org.insa.graph.Graph;
 import org.insa.graph.Node;
 import org.insa.graph.Point;
-
-import java.util.Arrays;
 
 public class AStarAlgorithm extends DijkstraAlgorithm {
 

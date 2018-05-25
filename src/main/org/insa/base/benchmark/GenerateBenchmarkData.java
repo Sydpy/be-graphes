@@ -3,7 +3,7 @@ package org.insa.base.benchmark;
 import org.insa.algo.ArcInspectorFactory;
 import org.insa.algo.shortestpath.DijkstraAlgorithm;
 import org.insa.algo.shortestpath.ShortestPathData;
-import org.insa.algo.utils.Label;
+import org.insa.algo.shortestpath.Label;
 import org.insa.graph.Graph;
 import org.insa.graph.GraphStatistics;
 import org.insa.graph.Node;

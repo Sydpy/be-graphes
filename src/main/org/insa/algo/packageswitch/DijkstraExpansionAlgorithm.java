@@ -3,8 +3,6 @@ package org.insa.algo.packageswitch;
 import org.insa.algo.AbstractSolution;
 import org.insa.algo.shortestpath.DijkstraAlgorithm;
 import org.insa.algo.shortestpath.ShortestPathData;
-import org.insa.algo.utils.BinaryHeap;
-import org.insa.algo.utils.Label;
 import org.insa.graph.*;
 
 import java.util.*;
