@@ -18,7 +18,15 @@ Ce bureau d'étude regroupe à la fois la pratique d'un langage orienté objet (
 
 ### Structures de données
 
+Voici un diagramme UML très simpliste des relations entre structures de données d'un graphe utilisées dans ce projet :
+
+![UML simplifié des structures de données](docs/graph-uml.png)
+
+Cette organisation se rapproche d'une liste d'adjacence puisqu'elle permet depuis un noeud de connaître ses successeurs en traversant ses arcs.
+
 ### Dijkstra
+
+![UML simplifié de Dijkstra](docs/dijkstra-uml.png)
 
 `DijkstraAlgorithm` utilise des `Label` pour associer à chaque `Node` un coût. Ces `Label`s implémentent `Comparable<Label>` et on peu donc les ordonner en fonction de leur côut afin qu'à chaque itération, on récupère le `Label` (et donc le `Node`) de moindre coût non-traité. L'ordonnancement se fait via un tas binaire (classe `BinaryHeap`). Cette structure de données est particulièrement adaptée à Dijkstra puisque l'extraction de l'élément de coût minimal se fait en  compléxité O(log(n)).
 
@@ -31,16 +39,17 @@ Lorsque la destination du `ShortestPathData` de l'algorithme est égale à `null
 
 ### A*-like Dijkstra
 
-Notre implémentation de l'algorithme A* est basée sur Dijkstra. La seule différence réside dans les `Label` utilisés par l'algorithme. Cet algorithme utilise des `LabelStar`s à la place de simples `Label`. Ceux-ci contiennent, en plus du `Node` et du coût dont ils héritent, une heuristique qui va correspondre à :
+![UML simplifié de A*](docs/astar-uml.png)
+
+Notre implémentation de l'algorithme A* est basée sur Dijkstra. La seule différence réside dans les `Label` utilisés. Cet algorithme utilise des `LabelStar` à la place de simples `Label`. Ceux-ci contiennent, en plus du `Node` et du coût dont ils héritent, une heuristique qui va correspondre à :
 * La distance à vol d'oiseau entre le `Node` et la destination lorsque l'on travaille en distance
 * Le temps de parcours minimum du vol d'oiseau lorsque l'on travaille en temps.
 
-Cette heuristique ne peut être modifiée après initialisation ce qui permet de préserver l'optimalité de la solution trouvée. En effet, son rôle est d'ordonnancer le choix des `Label` minimaux en privilégiant ceux proches de l'origine **ET** potentiellement proche (en distance ou en temps) de la destination. Pour qu'une heuristique puisse produire une solution optimale, il faut qu'elle représente une borne inférieure du coût du noeud jusqu'à la destination. Or nous nous sommes aperçu que dans certains cas très rares, calculer la distance à vol d'oiseau ne donnait pas toujours une borne inférieure sûrement dû à l'arrondi de la longueur de certains arcs. Même si ces cas sont extrêmement rares et que la solution produite est très proches de la solution optimale, nous avons préféré régler ce problème. Pour ce faire, au lieu de prendre la distance à vol d'oiseau en entier, nous prenons 90% de celle-ci, afin de laisser de la marge et s'assurer qu'on minimise bien le coût réel.   
+Le rôle de l'heuristique est d'ordonnancer le choix des `Label` minimaux en privilégiant ceux proches de l'origine **ET** potentiellement proche (en distance ou en temps) de la destination.
 
+Pour qu'une heuristique puisse produire une solution optimale, il faut qu'elle représente une borne inférieure du coût du noeud jusqu'à la destination. Or nous nous sommes aperçu que dans certains cas très rares, calculer la distance à vol d'oiseau ne donnait pas toujours une borne inférieure sûrement dû à l'arrondi de la longueur de certains arcs. Même si ces cas sont extrêmement rares et que la solution produite est très proche de la solution optimale, nous avons préféré régler ce problème. Pour ce faire, au lieu de prendre la distance à vol d'oiseau en entier, nous prenons 90% de celle-ci, afin de laisser de la marge et s'assurer qu'on minimise bien le coût réel.   
 
 Cette fois-ci, contrairement à Dijkstra, passer une destination `null` en paramètre de l'algorithme provoquera une `NullPointerException`. En effet, on a besoin d'une destination pour pouvoir calculer l'heuristique. On ne peut donc pas utiliser cet algorithme pour connaître les coûts de tous les sommets atteignables par l'origine en le lançant une seule fois.
-
-
 
 ## Tests de validité
 
@@ -50,35 +59,62 @@ Les tests se situent au sein de la classe abstraite `ShortestPathAlgorithmTest`.
 
 La classe est annotée comme `Parameterized` et chaque `Parameter` est un `ShortestPathData`. La méthode `data()` est en charge de la génération de ces données.
 
-Elle effectue d'abord la génération de tous les couples origine/destination possibles d'un graph très simple à 6 sommets, ce qui fait en tout 6x5=30 données de test :
+Elle effectue d'abord la génération de tous les couples origine/destination possibles d'un graphe très simple à 6 sommets, ce qui fait en tout 6x5=30 données de test :
 
-<insérer image ici>
+![Graphe simple à 6 sommets](docs/simple-graph.png)
 
-Ensuite, elle prend une carte ("Maps/bordeaux.mapgr" en l'occurence) et génère 8 couples aléatoires origine/destination. Chacun de ces couples est associé à chacun des `ArcInspector` disponibles via `ArcInspectorFactory` (5 en tout). On a donc 8*5=40 données de test supplémentaires.
+Ensuite, elle prend une carte ("Maps/toulouse.mapgr" en l'occurence) et génère 8 couples aléatoires origine/destination. Chacun de ces couples est associé à chacun des `ArcInspector` disponibles via `ArcInspectorFactory` (5 en tout). On a donc 8*5=40 données de test supplémentaires.
 
 ### Tests avec oracle
 
-L'oracle en question est Bellman-Ford et est considéré comme exacte, c'est-à-dire qu'il donnera systématiquement une solution optimale si elle existe. Le test passe si les solutions proposées par l'oracle et par l'algorithme sont toutes les deux `INFEASIBLE` ou alors qu'elles sont `FEASIBLE` et que les chemins de leurs solutions sont de même longueur lorsqu'on travaille en distance ou de même temps minimum de trajet lorsqu'on travaille en temps.
+L'oracle en question est Bellman-Ford et est considéré comme exact (étant donné qu'il n'a pas été codé par un étudiant), c'est-à-dire qu'il donnera systématiquement une solution optimale si elle existe. Le test passe si les solutions proposées par l'oracle et par l'algorithme sont toutes les deux `INFEASIBLE` ou alors qu'elles sont `FEASIBLE` et que les chemins de leurs solutions sont de même longueur lorsqu'on travaille en distance ou de même temps minimum de trajet lorsqu'on travaille en temps.
 
 ### Tests sans oracle
 
 Si le chemin `a -> b` est optimal, alors sa longueur ou temps de trajet minimum est la borne inférieure de tout autre chemin `a -> c -> b` produit par l'algorithme.
 
-On fait calculer la solution `a -> b` par l'algorithme. On choisit ensuite un noeud aléatoire `c` sur la carte. On vérifie que la somme des coûts `a -> c` et `c -> b` produits par l'algorithme soit inférieure au coût de la solution `a -> b`. Dans nos tests, nous répétons ce processus 5 fois pour chaque donnée de test.   
+On fait calculer la solution `a -> b` par l'algorithme. On choisit ensuite un noeud aléatoire `c` sur la carte. On vérifie que la somme des coûts `a -> c` et `c -> b` produits par l'algorithme soit inférieure au coût de la solution `a -> b`. Dans nos tests, nous répétons ce processus 5 fois pour chaque donnée de test.
 
 ## Tests de performance
 
 ### Organisation des tests
 
+Les données de test de performance sont au format CSV comme suit :
+
+| origin | destination |
+| --- | --- |
+| <id origine 1> | <id destination 1> |
+| <id origine 2> | <id destination 2> |
+| <id origine 3> | <id destination 3> |
+| <id origine 4> | <id destination 4> |
+| ...et caetera... | ...et caetera... |
+
+Le nom du fichier doit ressemblait à ceci :
+`<nom de la map>_<distance min>_<distance max>.csv`
+
+Par exemple le fichier de données de test `bordeaux_1234_2345.csv` portera sur la map `bordeaux.mapgr`, la distance minimale des chemins sera 1234 mètres, la distance maximale de 2345 mètres.
+
+Le main `Benchmark`, qui prend en paramètre le nom du dossier contenant les CSV de données de test, produira en sortie le fichier `BenchmarkResults.csv` qui sera formatté comme suit :
+
+| file | nb path | Dijkstra TIME | Dijkstra LENGTH | A* TIME | A* LENGTH |
+| --- | --- | --- | --- | --- | --- |
+| bordeaux_1234_2345.csv | 42 | 10.2 | 12.7 | 11.1 | 8.6 |
+| toulouse_8765_123413.csv | 323 | 20.5 | 24.6 | 22.7 | 12.3 |
+| ...ad vitam eternam... | lorem | ipsum | dolores | sit | amet |
+
+La première colonne renseigne sur le fichier de données utilisé pour le test (et donc indirectement sur la carte et les bornes de longueurs). La deuxième colonne renseigne sur le nombre de chemins présents dans le fichier. Les quatres colonnes suivantes sont les temps qu'il a fallu à chaque algorithme pour trouver la solution de tous les chemins du fichier de données.
+
+L'écriture des fichiers de données étant fastidieuse, nous avons écrit un main `GenerateBenchmarkData` qui s'occupe pour nous de, pour chaque `.mapgr` du répertoire qui lui est passé en paramètre, trouver environ 400 couples origin/destination pour lesquels il existe un chemin, et ce pour 3 intervalles de distance disjoints dépendants de la taille de la map. Il génère ensuite le fichier de données de test comme décrit précédemment.
+
 ### Résultats
 
 ## Problème ouvert : Échange de colis
 
-Lexique :
-* O1 : origine du premier robot
-* D1 : destination du premier robot
-* O2 : origine du second robot
-* D2 : destination du second robot
+Deux robots R1D1 et R2D2 conduisent des voitures. Le sujet insiste sur le fait qu'il s'agit de robots autonomes conduisant des voitures non-autonomes car les voitures autonomes, c'est de la science-fiction. Cependant, le cas de figure où les robots auraient des roulettes n'est pas évoqué et donc nous ne le traiterons pas.
+
+Ces deux robots ont chacun leurs origines respectives (O1 et O2) et leurs destinations (D1 et D2). Ils doivent se rencontrer sur leur trajet origine-destination pour échanger un colis précieux.
+
+L'objectif est de trouver pour ces deux robots un trajet leur permettant d’échanger leur colis et d'arriver le plus tôt possible à destination. Pour ne considérer qu’un seul objectif, on va chercher à minimiser la somme des temps de trajets des deux robots. La solution optimale obtenue doit permettre de connaître le point de rencontre des deux robots et de reconstituer les trajets effectués.
 
 Notre méthode va faire s'étendre 4 Dijkstras depuis chacun de ces points. Nous avons donc 4 algorithmes :
 * DO1 : le Dijkstra qui s'étend depuis O1
@@ -86,10 +122,8 @@ Notre méthode va faire s'étendre 4 Dijkstras depuis chacun de ces points. Nous
 * DO2 : le Dijkstra qui s'étend depuis O2
 * DD2 : le Dijkstra qui s'étend depuis D2 (s'applique sur la transposée du graphe)
 
-Pour chaque point du graphe, on compte le nombre de fois qu'il a été marqué par un algorithme. Le point de rencontre est donc le premier point atteint par les 4 Dijkstras, à condition qu'ils s'étendent à la même vitesse. Pour avoir une expansion équivalente sur tous les algorithmes, nous faisons avancer d'une itération le Dijkstra le moins étendu en priorité (via sa méthode `step()`). Ainsi si un Dijkstra évolue dans un milieu dense il effectuera plus d'itérations que les autres mais les 4 auront des étendues comparables. Le point de rencontre (PR) se situera donc à équidistance des 4 points. Retracer les trajets que doivent prendre chacun des robots est trivial :
+Pour chaque point du graphe, on compte le nombre de fois qu'il a été marqué par un algorithme. Le point de rencontre est donc le premier point atteint par les 4 Dijkstras, à condition qu'ils s'étendent à la même vitesse. Pour avoir une expansion équivalente sur tous les algorithmes, nous faisons avancer d'une itération le Dijkstra le moins étendu en priorité (via sa méthode `step()`). Ainsi si un Dijkstra évolue dans un milieu dense il effectuera plus d'itérations que les autres mais les 4 auront des étendues comparables. Le point de rencontre (PR) se situera donc à peu près à équidistance des 4 points. Retracer les trajets que doivent prendre chacun des robots est trivial :
 * On concatène les chemins de O1 à PR (donné par DO1) et de PR à D1 (transposée du chemin de D1 à PR donné par DD1).
 * On concatène les chemins de O2 à PR (donné par DO2) et de PR à D2 (transposée du chemin de D2 à PR donné par DD2).
 
-Cette solution a été implémentée sous la forme de l'algorithme `DijkstraExpansionAlgorithm` du package `org.insa.algo.packageswitch`. Nous avons aussi complété les classes `PackageSwitchGraphicObserver` et `PackageSwitchSolution` afin de pouvoir visualiser facilement le déroulement de l'algorithme. Un noeud atteint une fois sera coloré en cyan, deux fois en bleu, trois fois en rose et quatre fois en magenta (seul PR devrait être en magenta). Enfin, quand la solution a été trouvée, on met un marker sur PR et on trace les deux chemins. Notre méthode peut facilement se généraliser à n robots.
-
-## Conclusion
+Cette solution a été implémentée sous la forme de l'algorithme `DijkstraExpansionAlgorithm` du package `org.insa.algo.packageswitch`. Nous avons aussi complété les classes `PackageSwitchGraphicObserver` et `PackageSwitchSolution` afin de pouvoir visualiser facilement le déroulement de l'algorithme. Un noeud atteint une fois sera coloré en cyan, deux fois en bleu, trois fois en rose et quatre fois en magenta (seul PR devrait être en magenta). Enfin, quand la solution a été trouvée, on met un marker sur PR et on trace les deux chemins. Cette méthode peut facilement se généraliser à n robots.
