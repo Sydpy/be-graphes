@@ -7,7 +7,7 @@
 
 ## Introduction
 
-Ce bureau d'étude regroupe à la fois la pratique d'un langage orienté objet (Java) ainsi que l'implémentation d'algorithmes relevant de la théorie des graphes. Le projet initial est disponible [ici](https://duckduckgo.com). Les fonctionnalités implémentées sont :
+Ce bureau d'étude regroupe à la fois la pratique d'un langage orienté objet (Java) ainsi que l'implémentation d'algorithmes relevant de la théorie des graphes. Le projet initial est disponible [ici](https://gitea.typename.fr/INSA/be-graphes). Les fonctionnalités implémentées sont :
 * L'algorithme de Dijkstra
 * L'algorithme A* (en version Dijkstra)
 * Un algorithme de résolution du problème d'échange de colis
@@ -33,10 +33,14 @@ Lorsque la destination du `ShortestPathData` de l'algorithme est égale à `null
 
 Notre implémentation de l'algorithme A* est basée sur Dijkstra. La seule différence réside dans les `Label` utilisés par l'algorithme. Cet algorithme utilise des `LabelStar`s à la place de simples `Label`. Ceux-ci contiennent, en plus du `Node` et du coût dont ils héritent, une heuristique qui va correspondre à :
 * La distance à vol d'oiseau entre le `Node` et la destination lorsque l'on travaille en distance
-* Le temps de parcours minimum du vol d'oiseau lorsque l'on travaille en temps
-Cette heuristique ne peut être modifiée après initialisation ce qui permet de préserver l'optimalité de la solution trouvée. En effet, son rôle est d'ordonnancer le choix des `Label` minimaux en privilégiant ceux proches de l'origine **ET** potentiellement proche (en distance ou en temps) de la destination. Cet ordonnancement peut ne pas être judicieux dans tous les cas, par exemple si un obstacle important se situe entre l'origine et la destination. Néanmoins il s'agit uniquement de l'ordre dans lequel seront choisis les `Label` minimaux à chaque itération, s'il existe une solution, elle sera trouvée.
+* Le temps de parcours minimum du vol d'oiseau lorsque l'on travaille en temps.
+
+Cette heuristique ne peut être modifiée après initialisation ce qui permet de préserver l'optimalité de la solution trouvée. En effet, son rôle est d'ordonnancer le choix des `Label` minimaux en privilégiant ceux proches de l'origine **ET** potentiellement proche (en distance ou en temps) de la destination. Pour qu'une heuristique puisse produire une solution optimale, il faut qu'elle représente une borne inférieure du coût du noeud jusqu'à la destination. Or nous nous sommes aperçu que dans certains cas très rares, calculer la distance à vol d'oiseau ne donnait pas toujours une borne inférieure sûrement dû à l'arrondi de la longueur de certains arcs. Même si ces cas sont extrêmement rares et que la solution produite est très proches de la solution optimale, nous avons préféré régler ce problème. Pour ce faire, au lieu de prendre la distance à vol d'oiseau en entier, nous prenons 90% de celle-ci, afin de laisser de la marge et s'assurer qu'on minimise bien le coût réel.   
+
 
 Cette fois-ci, contrairement à Dijkstra, passer une destination `null` en paramètre de l'algorithme provoquera une `NullPointerException`. En effet, on a besoin d'une destination pour pouvoir calculer l'heuristique. On ne peut donc pas utiliser cet algorithme pour connaître les coûts de tous les sommets atteignables par l'origine en le lançant une seule fois.
+
+
 
 ## Tests de validité
 
@@ -69,5 +73,23 @@ On fait calculer la solution `a -> b` par l'algorithme. On choisit ensuite un no
 ### Résultats
 
 ## Problème ouvert : Échange de colis
+
+Lexique :
+* O1 : origine du premier robot
+* D1 : destination du premier robot
+* O2 : origine du second robot
+* D2 : destination du second robot
+
+Notre méthode va faire s'étendre 4 Dijkstras depuis chacun de ces points. Nous avons donc 4 algorithmes :
+* DO1 : le Dijkstra qui s'étend depuis O1
+* DD1 : le Dijkstra qui s'étend depuis D1 (s'applique sur la transposée du graphe)
+* DO2 : le Dijkstra qui s'étend depuis O2
+* DD2 : le Dijkstra qui s'étend depuis D2 (s'applique sur la transposée du graphe)
+
+Pour chaque point du graphe, on compte le nombre de fois qu'il a été marqué par un algorithme. Le point de rencontre est donc le premier point atteint par les 4 Dijkstras, à condition qu'ils s'étendent à la même vitesse. Pour avoir une expansion équivalente sur tous les algorithmes, nous faisons avancer d'une itération le Dijkstra le moins étendu en priorité (via sa méthode `step()`). Ainsi si un Dijkstra évolue dans un milieu dense il effectuera plus d'itérations que les autres mais les 4 auront des étendues comparables. Le point de rencontre (PR) se situera donc à équidistance des 4 points. Retracer les trajets que doivent prendre chacun des robots est trivial :
+* On concatène les chemins de O1 à PR (donné par DO1) et de PR à D1 (transposée du chemin de D1 à PR donné par DD1).
+* On concatène les chemins de O2 à PR (donné par DO2) et de PR à D2 (transposée du chemin de D2 à PR donné par DD2).
+
+Cette solution a été implémentée sous la forme de l'algorithme `DijkstraExpansionAlgorithm` du package `org.insa.algo.packageswitch`. Nous avons aussi complété les classes `PackageSwitchGraphicObserver` et `PackageSwitchSolution` afin de pouvoir visualiser facilement le déroulement de l'algorithme. Un noeud atteint une fois sera coloré en cyan, deux fois en bleu, trois fois en rose et quatre fois en magenta (seul PR devrait être en magenta). Enfin, quand la solution a été trouvée, on met un marker sur PR et on trace les deux chemins. Notre méthode peut facilement se généraliser à n robots.
 
 ## Conclusion
