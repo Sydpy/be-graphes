@@ -2,6 +2,8 @@
 
 ## Auteurs
 
+3 MIC C
+
 * Sylvain Dupouy
 * Léo Picou
 
@@ -104,9 +106,35 @@ Le main `Benchmark`, qui prend en paramètre le nom du dossier contenant les CSV
 
 La première colonne renseigne sur le fichier de données utilisé pour le test (et donc indirectement sur la carte et les bornes de longueurs). La deuxième colonne renseigne sur le nombre de chemins présents dans le fichier. Les quatres colonnes suivantes sont les temps qu'il a fallu à chaque algorithme pour trouver la solution de tous les chemins du fichier de données.
 
-L'écriture des fichiers de données étant fastidieuse, nous avons écrit un main `GenerateBenchmarkData` qui s'occupe pour nous de, pour chaque `.mapgr` du répertoire qui lui est passé en paramètre, trouver environ 400 couples origin/destination pour lesquels il existe un chemin, et ce pour 3 intervalles de distance disjoints dépendants de la taille de la map. Il génère ensuite le fichier de données de test comme décrit précédemment.
+L'écriture des fichiers de données étant fastidieuse, nous avons écrit un main `GenerateBenchmarkData` qui s'occupe pour nous de, pour chaque `.mapgr` du répertoire qui lui est passé en paramètre, trouver environ 400 couples origin/destination pour lesquels il existe un chemin, et ce pour 3 intervalles de distance disjoints dépendants de la taille de la map. Il génère ensuite le fichier de données de test comme décrit précédemment. 
 
 ### Résultats
+
+Voici un exemple de résultats  que l'on pourrait considérer comme significatif au vu de la diversité des cartes :
+
+| file                            | nb path | Dijkstra TIME | A* TIME  | Dijkstra LENGTH | A* LENGTH | 
+|---------------------------------|---------|---------------|----------|-----------------|-----------| 
+| bordeaux_2269_4538.csv          | 372     | 1.021         | 1.0404   | 0.0921          | 0.0319    | 
+| bordeaux_4538_6807.csv          | 372     | 2.0168        | 2.0401   | 1.0766          | 0.0675    | 
+| bordeaux_6807_9076.csv          | 372     | 3.04          | 3.0729   | 2.0911          | 1.0384    | 
+| carre-dense_19645_39290.csv     | 400     | 160.0915      | 246.0961 | 160.0464        | 104.0981  | 
+| carre-dense_39290_58935.csv     | 400     | 445.0871      | 522.0156 | 445.0685        | 143.029   | 
+| carre-dense_58935_78581.csv     | 400     | 849.0296      | 937.082  | 864.0985        | 282.0584  | 
+| haute-garonne_24050_48101.csv   | 398     | 34.014        | 37.0823  | 25.0492         | 10.0953   | 
+| haute-garonne_48101_72151.csv   | 398     | 39.0734       | 42.0746  | 30.0438         | 17.0001   | 
+| haute-garonne_72151_96202.csv   | 398     | 52.0861       | 56.0325  | 39.0701         | 26.0801   | 
+| insa_1093_1640.csv              | 354     | 0.0071        | 0.0081   | 0.0076          | 0.0036    | 
+| insa_1640_2187.csv              | 354     | 0.009         | 0.0106   | 0.0096          | 0.0059    | 
+| insa_546_1093.csv               | 356     | 0.0052        | 0.0064   | 0.0044          | 0.0027    | 
+| new-caledonia_192524_385049.csv | 366     | 7.0995        | 8.0643   | 6.0648          | 6.0046    | 
+| new-caledonia_385049_577574.csv | 301     | 6.0527        | 6.0873   | 5.0617          | 6.0098    | 
+| toulouse_2956_5912.csv          | 387     | 2.0735        | 3.0232   | 2.0109          | 0.0704    | 
+| toulouse_5912_8868.csv          | 386     | 5.0947        | 6.0641   | 4.0759          | 1.0587    | 
+| toulouse_8868_11825.csv         | 387     | 7.0856        | 8.0538   | 6.071           | 2.0568    | 
+
+On constate que globalement A* et légèrement moins rapide que Dijkstra lorsque l'on cherche le chemin le plus rapide. Néanmoins la différence est souvent faible (de l'ordre de 10%) et semble être dûe à la densité du graphe comme les benchmarks sur `carre-dense` semblent le montrer.
+
+Lorsque le travaille en distance plutôt qu'en temps , A* devient tout de suite beaucoup plus avantageux. On peut gagner entre 30% et 70%, de temps d'éxécution lorsque l'on utilise A* plutôt que Dijkstra.  
 
 ## Problème ouvert : Échange de colis
 
