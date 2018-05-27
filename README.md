@@ -155,3 +155,9 @@ Pour chaque point du graphe, on compte le nombre de fois qu'il a été marqué p
 * On concatène les chemins de O2 à PR (donné par DO2) et de PR à D2 (transposée du chemin de D2 à PR donné par DD2).
 
 Cette solution a été implémentée sous la forme de l'algorithme `DijkstraExpansionAlgorithm` du package `org.insa.algo.packageswitch`. Nous avons aussi complété les classes `PackageSwitchGraphicObserver` et `PackageSwitchSolution` afin de pouvoir visualiser facilement le déroulement de l'algorithme. Un noeud atteint une fois sera coloré en cyan, deux fois en bleu, trois fois en rose et quatre fois en magenta (seul PR devrait être en magenta). Enfin, quand la solution a été trouvée, on met un marker sur PR et on trace les deux chemins. Cette méthode peut facilement se généraliser à n robots.
+
+## Conclusion
+
+Pour rappel, nous avons implémenté et testé **Dijkstra** et **A***. Les tests de validité passent tous et les tests de performance nous ont montré que A* est largement plus rapide que Dijkstra lorsque que l'on cherche le chemin le plus court et Dijkstra est légèrement plus rapide lorsqu'il s'agit de trouver le chemin de durée minimale.
+
+Nous avons aussi implémenté notre solution du problème d'échange de colis, le nom de notre implémentation étant **Dijkstra Expansion**. Elle est parfaitement utilisable via l'interface de l'application et semble donner une solution optimale "à vue d'oeil". Nous n'avons cependant pas réalisé de tests unitaires pour vérifier son optimalité et ainsi gagner quelques points bonus.
