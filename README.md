@@ -30,14 +30,14 @@ Cette organisation se rapproche d'une liste d'adjacence puisqu'elle permet depui
 
 ![UML simplifié de Dijkstra](docs/dijkstra-uml.png)
 
-`DijkstraAlgorithm` utilise des `Label` pour associer à chaque `Node` un coût. Ces `Label`s implémentent `Comparable<Label>` et on peu donc les ordonner en fonction de leur côut afin qu'à chaque itération, on récupère le `Label` (et donc le `Node`) de moindre coût non-traité. L'ordonnancement se fait via un tas binaire (classe `BinaryHeap`). Cette structure de données est particulièrement adaptée à Dijkstra puisque l'extraction de l'élément de coût minimal se fait en  compléxité O(log(n)).
+`DijkstraAlgorithm` utilise des `Label` pour associer à chaque `Node` un coût. Ces `Label` implémentent `Comparable<Label>` et on peut donc les ordonner en fonction de leur côut afin qu'à chaque itération, on récupère le `Label` (et donc le `Node`) de moindre coût non-traité. L'ordonnancement se fait via un tas binaire (classe `BinaryHeap`). Cette structure de données est particulièrement adaptée à Dijkstra puisque l'extraction de l'élément de coût minimal se fait en  compléxité O(log(n)).
 
 Nous avons choisi de découper l'implémentation de l'algorithme en deux méthodes : `step()` et `doRun()` :
 
 * `step()` : Cette méthode va effectuer une itération de l'algorithme et retourner le `Node` qui a été choisi comme minimum pendant cette itération ou bien `null` si l'algorithme est terminé. Nous l'avons extraite de la méthode `doRun()` et définie comme publique afin de pouvoir contrôler l'algorithme au pas à pas, ce qui nous sera utile lors de la résolution du problème ouvert d'échange de colis.
-* `doRun()` : Cette méthode se doit d'être implémentée pour les implémentations d'`AbstractAlgorithm`. Elle contient la boucle principale de l'algorithme dans laquelle sera appelé `step()` et renvoie la solution de l'algorithme.  
+* `doRun()` : Cette méthode se doit d'être implémentée pour les implémentations d'`AbstractAlgorithm`. Elle contient la boucle principale de l'algorithme dans laquelle sera appelée `step()` et renvoie la solution de l'algorithme.  
 
-Lorsque la destination du `ShortestPathData` de l'algorithme est égale à `null`, l'algorithme se terminera uniquement lorsque son tas binaire sera vide. Cela permet d'au besoin connaître les coûts minimaux de tous les sommets atteignables depuis l'origine.
+Lorsque la destination du `ShortestPathData` de l'algorithme est égale à `null`, l'algorithme se terminera uniquement lorsque son tas binaire sera vide. Cela permet de connaître au besoin les coûts minimaux de tous les sommets atteignables depuis l'origine.
 
 ### A*-like Dijkstra
 
@@ -47,7 +47,7 @@ Notre implémentation de l'algorithme A* est basée sur Dijkstra. La seule diff�
 * La distance à vol d'oiseau entre le `Node` et la destination lorsque l'on travaille en distance
 * Le temps de parcours minimum du vol d'oiseau lorsque l'on travaille en temps.
 
-Le rôle de l'heuristique est d'ordonnancer le choix des `Label` minimaux en privilégiant ceux proches de l'origine **ET** potentiellement proche (en distance ou en temps) de la destination.
+Le rôle de l'heuristique est d'ordonnancer le choix des `Label` minimaux en privilégiant ceux proches de l'origine **ET** potentiellement proches (en distance ou en temps) de la destination.
 
 Pour qu'une heuristique puisse produire une solution optimale, il faut qu'elle représente une borne inférieure du coût du noeud jusqu'à la destination. Or nous nous sommes aperçu que dans certains cas très rares, calculer la distance à vol d'oiseau ne donnait pas toujours une borne inférieure sûrement dû à l'arrondi de la longueur de certains arcs. Même si ces cas sont extrêmement rares et que la solution produite est très proche de la solution optimale, nous avons préféré régler ce problème. Pour ce faire, au lieu de prendre la distance à vol d'oiseau en entier, nous prenons 90% de celle-ci, afin de laisser de la marge et s'assurer qu'on minimise bien le coût réel.   
 
@@ -91,18 +91,18 @@ Les données de test de performance sont au format CSV comme suit :
 | <id origine 4> | <id destination 4> |
 | ...et caetera... | ...et caetera... |
 
-Le nom du fichier doit ressemblait à ceci :
+Le nom du fichier doit ressembler à ceci :
 `<nom de la map>_<distance min>_<distance max>.csv`
 
 Par exemple le fichier de données de test `bordeaux_1234_2345.csv` portera sur la map `bordeaux.mapgr`, la distance minimale des chemins sera 1234 mètres, la distance maximale de 2345 mètres.
 
-Le main `Benchmark`, qui prend en paramètre le nom du dossier contenant les CSV de données de test, produira en sortie le fichier `BenchmarkResults.csv` qui sera formatté comme suit :
+Le main `Benchmark`, qui prend en paramètre le nom du dossier contenant les CSV de données de test, produira en sortie le fichier `BenchmarkResults.csv` qui sera formaté comme suit :
 
 | file | nb path | Dijkstra TIME | Dijkstra LENGTH | A* TIME | A* LENGTH |
 | --- | --- | --- | --- | --- | --- |
 | bordeaux_1234_2345.csv | 42 | 10.2 | 12.7 | 11.1 | 8.6 |
 | toulouse_8765_123413.csv | 323 | 20.5 | 24.6 | 22.7 | 12.3 |
-| ...ad vitam eternam... | lorem | ipsum | dolores | sit | amet |
+| ...ad vitam eternam... | alea jacta esto... | ipsum... | dolores... | sit... | amet... |
 
 La première colonne renseigne sur le fichier de données utilisé pour le test (et donc indirectement sur la carte et les bornes de longueurs). La deuxième colonne renseigne sur le nombre de chemins présents dans le fichier. Les quatres colonnes suivantes sont les temps qu'il a fallu à chaque algorithme pour trouver la solution de tous les chemins du fichier de données.
 
