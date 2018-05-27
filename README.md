@@ -99,7 +99,7 @@ Par exemple le fichier de données de test `bordeaux_1234_2345.csv` portera sur 
 
 Le main `Benchmark`, qui prend en paramètre le nom du dossier contenant les CSV de données de test, produira en sortie le fichier `BenchmarkResults.csv` qui sera formaté comme suit :
 
-| file | nb path | Dijkstra TIME | Dijkstra LENGTH | A* TIME | A* LENGTH |
+| file | nb path | Dijkstra TIME | A* TIME | Dijkstra LENGTH | A* LENGTH |
 | --- | --- | --- | --- | --- | --- |
 | bordeaux_1234_2345.csv | 42 | 10.2 | 12.7 | 11.1 | 8.6 |
 | toulouse_8765_123413.csv | 323 | 20.5 | 24.6 | 22.7 | 12.3 |
