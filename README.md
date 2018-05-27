@@ -103,7 +103,7 @@ Le main `Benchmark`, qui prend en paramètre le nom du dossier contenant les CSV
 | --- | --- | --- | --- | --- | --- |
 | bordeaux_1234_2345.csv | 42 | 10.2 | 12.7 | 11.1 | 8.6 |
 | toulouse_8765_123413.csv | 323 | 20.5 | 24.6 | 22.7 | 12.3 |
-| ...ad vitam eternam... | alea jacta esto... | ipsum... | dolores... | sit... | amet... |
+| alea jacta esto... | lorem... | ipsum... | dolores... | sit... | amet... |
 
 La première colonne renseigne sur le fichier de données utilisé pour le test (et donc indirectement sur la carte et les bornes de longueurs). La deuxième colonne renseigne sur le nombre de chemins présents dans le fichier. Les quatres colonnes suivantes sont les temps qu'il a fallu à chaque algorithme pour trouver la solution de tous les chemins du fichier de données.
 
