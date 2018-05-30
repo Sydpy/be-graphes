@@ -47,7 +47,7 @@ public class AStarAlgorithm extends DijkstraAlgorithm {
             case LENGTH:
                 return distance;
             case TIME:
-                return distance / (double) (1000 * getInputData().getMaximumSpeed());
+                return distance / (1000. * (double) getInputData().getMaximumSpeed() / 3600.);
         }
 
         return 0.;

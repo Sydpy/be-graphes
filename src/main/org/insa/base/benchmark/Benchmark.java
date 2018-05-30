@@ -63,7 +63,7 @@ public class Benchmark {
 
         @Override
         public int getMaximumSpeed() {
-            return GraphStatistics.NO_MAXIMUM_SPEED;
+            return 130;
         }
 
         @Override

@@ -1,5 +1,6 @@
 package org.insa.algo.shortestpath;
 
+import org.insa.algo.AbstractInputData;
 import org.insa.algo.ArcInspector;
 import org.insa.algo.ArcInspectorFactory;
 import org.insa.graph.*;
@@ -26,6 +27,51 @@ import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
 public abstract class ShortestPathAlgorithmTest {
+
+    private static ArcInspector[] inspectors = {
+            new ArcInspector() {
+                @Override
+                public boolean isAllowed(Arc arc) {
+                    return true;
+                }
+
+                @Override
+                public double getCost(Arc arc) {
+                    return arc.getLength();
+                }
+
+                @Override
+                public int getMaximumSpeed() {
+                    return 130;
+                }
+
+                @Override
+                public AbstractInputData.Mode getMode() {
+                    return AbstractInputData.Mode.LENGTH;
+                }
+            },
+            new ArcInspector() {
+                @Override
+                public boolean isAllowed(Arc arc) {
+                    return true;
+                }
+
+                @Override
+                public double getCost(Arc arc) {
+                    return arc.getMinimumTravelTime();
+                }
+
+                @Override
+                public int getMaximumSpeed() {
+                    return 130;
+                }
+
+                @Override
+                public AbstractInputData.Mode getMode() {
+                    return AbstractInputData.Mode.TIME;
+                }
+            }
+    };
 
     @Parameterized.Parameters
     public static Collection<Object> data() throws IOException {
@@ -87,7 +133,7 @@ public abstract class ShortestPathAlgorithmTest {
 
         Graph graph1 = new Graph("ID", "", Arrays.asList(nodes), null);
 
-        ArcInspector insp = ArcInspectorFactory.getAllFilters().get(0);
+        ArcInspector insp = inspectors[0];
         //For each pari of nodes, create a new test data
         for (int i = 0; i < 6; i++) {
             for (int j = 0; j < 6; j++) {
@@ -104,7 +150,7 @@ public abstract class ShortestPathAlgorithmTest {
         int graph2Size = graph2.size();
 
         Random rand = new Random();
-        for (ArcInspector inspector : ArcInspectorFactory.getAllFilters()) {
+        for (ArcInspector inspector : inspectors) {
             for (int i = 0; i < 8; i++) {
 
                 //Get two random nodes that must be different
